@@ -1,9 +1,9 @@
-use v6.c;
-use Docker::Platform::Service::DNS;
+use v6;
+use Platform::Docker::Service::DNS;
 use Text::Wrap;
 use YAMLish;
 
-class Docker::Platform {
+class Platform {
 
     has Str $.domain;
     has Str $.data-path;
@@ -14,7 +14,7 @@ class Docker::Platform {
         # say @.services;
         say "Platform";
         {
-            my $dns = Docker::Platform::Service::DNS.new(:$.domain);
+            my $dns = Platform::Docker::Service::DNS.new(:$.domain);
             my %res = $dns.start;
             say sprintf("├─ Service: DNS     [%s]", %res<err>.chars == 0 ?? "\c[heavy check mark]" !! "\c[heavy multiplication x]");
             say "│  └─ " ~ join("\n│     ", wrap-text(%res<err>).lines) if %res<err>.chars > 0;
@@ -65,7 +65,7 @@ class Docker::Platform {
 
     multi method stop {
         # say @.services;
-        my $dns = Docker::Platform::Service::DNS.new(:$.domain);
+        my $dns = Platform::Docker::Service::DNS.new(:$.domain);
         my %res = $dns.stop;
     }
 

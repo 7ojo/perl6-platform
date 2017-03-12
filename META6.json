@@ -1,0 +1,19 @@
+{
+    "perl"          : "6",
+    "name"          : "Platform",
+    "version"       : "0.0.1",
+    "description"   : "Tool for managing running single projects or tightly coupled projects via Docker environment",
+    "authors"       : [ "Jarkko Haapalainen <jarkko@viidakko.fi>" ],
+    "auth"          : "github:7ojo",
+    "tags"          : [ "Platform", "Docker", "Tool", "Development" ],
+    "provides"      : {
+        "Platform"                              : "lib/Platform.pm6",
+        "Platform::Docker::Container"           : "lib/Platform/Docker/Container.pm6",
+        "Platform::Docker::Service::DNS"        : "lib/Platform/Docker/Service/DNS.pm6"
+    },
+    "depends"       : [
+        "Text::Wrap",
+        "YAMLish"
+    ],
+    "source-url"    : "https://github.com/7ojo/perl6-platform.git"
+}

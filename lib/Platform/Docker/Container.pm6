@@ -1,6 +1,6 @@
-use v6.c;
+use v6;
 
-class Docker::Platform::Container {
+class Platform::Docker::Container {
 
     has Str $.domain = 'local';
 

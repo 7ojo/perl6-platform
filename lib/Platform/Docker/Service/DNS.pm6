@@ -1,7 +1,7 @@
-use v6.c;
-use Docker::Platform::Container;
+use v6;
+use Platform::Docker::Container;
 
-class Docker::Platform::Service::DNS is Docker::Platform::Container {
+class Platform::Docker::Service::DNS is Platform::Docker::Container {
 
     has Str $.name = 'platform-dns';
 

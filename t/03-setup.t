@@ -2,7 +2,15 @@ use v6.c;
 use lib 't/lib';
 use Test;
 use Template;
-use Docker::Platform::Service::DNS;
+
+plan 6;
+
+constant AUTHOR = ?%*ENV<AUTHOR_TESTING>;
+
+if not AUTHOR {
+     skip-rest "Skipping author test";
+     exit;
+}
 
 my $tmpdir = $*TMPDIR ~ '/test-docker-platform-10-setup';
 mkdir $tmpdir;

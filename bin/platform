@@ -1,6 +1,6 @@
 #!/usr/bin/env perl6
 
-use v6.c;
+use v6;
 use lib 'lib';
 
 sub load-module(:$name, :$domain, :$data-path) {
@@ -8,77 +8,44 @@ sub load-module(:$name, :$domain, :$data-path) {
     ::($name).new(:$domain, :$data-path);
 }
 
-#| Start development platform
+#| Start platform
 # Example: $ platform start
 # Example: $ platform start -p project-butterfly
 # Example: $ platform start -c custom-setup.yml -p project-butterfly
 multi sub MAIN('start', Str :$project?, Str :$config?, Str :$domain = 'local', Str :$data-path = '~/.platform') {
     # TODO: Figure this out how to do this without if-statement
     if $project {
-        load-module(:name<Docker::Platform>, :$domain, :$data-path).start($project);
+        load-module(:name<Platform>, :$domain, :$data-path).start($project);
     } else {
-        load-module(:name<Docker::Platform>, :$domain, :$data-path).start;
+        load-module(:name<Platform>, :$domain, :$data-path).start;
     }
 }
 
-#| Stop development platform
+#| Stop platform
 multi sub MAIN('stop', Str :$project?, Str :$domain = 'local', Str :$data-path = '~/.platform') {
     # TODO: Figure this out how to do this without if-statement
     if $project {
-        load-module(:name<Docker::Platform>, :$domain, :$data-path).stop($project);
+        load-module(:name<Platform>, :$domain, :$data-path).stop($project);
     } else {
-        load-module(:name<Docker::Platform>, :$domain, :$data-path).stop;
+        load-module(:name<Platform>, :$domain, :$data-path).stop;
     }
 }
 
 #| Generation of RSA Private Key
 multi sub MAIN('ssl', 'genrsa', Str :$domain = 'local', Str :$data-path = '~/.platform') {
-    load-module(:name<Docker::Platform>, :$domain, :$data-path).ssl('genrsa');
+    load-module(:name<Platform>, :$domain, :$data-path).ssl('genrsa');
 }
 
 #| Generation of authentication keys
 multi sub MAIN('ssh', 'keygen', Str :$domain = 'local', Str :$data-path = '~/.platform') {
-    load-module(:name<Docker::Platform>, :$domain, :$data-path).ssh('keygen'); 
+    load-module(:name<Platform>, :$domain, :$data-path).ssh('keygen'); 
 }
 
-#| TODO: ssh connect
+# #| TODO: ssh connect
 # Example: $ platform ssh connect --from=project-butterfly --to=project-snail --user=platorc
-multi sub MAIN('ssh', 'connect', Str :$from!, Str :$to!, Str :$user = 'platorc') {
+# multi sub MAIN('ssh', 'connect', Str :$from!, Str :$to!, Str :$user = 'platorc') {}
 
-}
-
-#| Setup passwordless SUDO commands for account
+# #| Setup passwordless SUDO commands for account
 # Example: $ platform sudo grant -p project-butterfly -u platorc -h ALL -r '(www-data:www-data)' -c '/bin/installer'
-multi sub MAIN('sudo', 'grant', Str :p(:$project)!, Str :u(:$user) = 'platorc', Str :h(:$host) = 'ALL', Str :r(:$runas) = 'ALL', Str :c(:$command)!) {
+# multi sub MAIN('sudo', 'grant', Str :p(:$project)!, Str :u(:$user) = 'platorc', Str :h(:$host) = 'ALL', Str :r(:$runas) = 'ALL', Str :c(:$command)!) {}
 
-
-}
-
-=finish
-
-# platform.yml
-# Example: $ platform start -c ./platform.yml
-# Example: $ platform start -c ./platform.yml -p cem
-# --volume <host-project-path:/app/<project-name>
-defaults:
-    user: lmorc
-    runas: (www-data:www-data)
-
-start:
-    - auth
-    - cem
-    - mailer
-
-ssh:
-    - from: auth to: mailer
-    - from: auth to: cem
-
-sudo
-    - project: cem command: /usr/share/lianacem/ui/bin/installer
-    - project: mailer command: /usr/share/lianamailer/installer/bin/installer
-         
-cem:
-    type: systemd
-    status:
-        - file: /var/log/runner.log
-        - line: All done 
