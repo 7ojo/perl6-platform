@@ -1,35 +1,5 @@
 unit module Template;
 
-sub docker-makefile(%project) returns Str is export {
-    qq{
-.PHONY: test build detach
-
-ROOT_DIR:=\$(shell dirname \$(realpath \$(lastword \$(MAKEFILE_LIST))))
-
-title:
-	@echo "%project<title> "
-
-test: title
-	@echo "├─ Phase: Test"
-
-build: test
-	@echo "├─ Phase: Build"
-	docker build -t %project<name> .
-
-detach: build
-	@echo "└─ Phase: Run"
-	docker run \\
-		--name %project<name> \\
-		--hostname %project<name>.local \\
-		--detach \\
-		--interactive=true \\
-		--tty=true \\
-		--rm \\
-		--volume \$(shell dirname \$(ROOT_DIR))/html:/usr/share/nginx/html:ro \\
-		%project<name> nginx -g 'daemon off;'
-    }.trim;
-}
-
 sub docker-dockerfile(%project) returns Str is export {
 	q{
 FROM nginx:alpine
