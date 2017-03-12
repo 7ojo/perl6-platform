@@ -9,19 +9,23 @@ mkdir $tmpdir;
 
 ok $tmpdir.IO.e, "got $tmpdir";
 
-# Setup project files for project-butterfly
-my %project-butterfly =
-    title => "Project \c[BUTTERFLY]",
-    name => "project-butterfly"
-;
-mkdir "$tmpdir/project-butterfly/docker";
-# spurt "$tmpdir/project-butterfly/docker/Makefile", docker-makefile(%project-butterfly);
-spurt "$tmpdir/project-butterfly/docker/Dockerfile", docker-dockerfile(%project-butterfly);
-mkdir "$tmpdir/project-butterfly/html";
-spurt "$tmpdir/project-butterfly/html/index.html", html-welcome(%project-butterfly);
-#run <cp -r>, "$tmpdir/project-butterfly", <.>;
-# TODO: run <bin/platform start>
-# TODO: docker run -d --name dns-gen --publish 53:53/udp --volume /var/run/docker.sock:/var/run/docker.sock:ro --label dns.tld=local --env DOMAIN_TLD=local   zetaron/docker-dns-gen
+{ # Setup project files for project-butterfly
+    my %project-butterfly =
+        title => "Project \c[BUTTERFLY]",
+        name => "project-butterfly"
+    ;
+    mkdir "$tmpdir/project-butterfly/docker";
+    spurt "$tmpdir/project-butterfly/docker/Dockerfile", docker-dockerfile(%project-butterfly);
+    my $project-yml = q:heredoc/END/;
+    command: nginx -g 'daemon off;'
+    volumes:
+        - html:/usr/share/nginx/html:ro
+    END
+    spurt "$tmpdir/project-butterfly/docker/project.yml", $project-yml;
+    mkdir "$tmpdir/project-butterfly/html";
+    spurt "$tmpdir/project-butterfly/html/index.html", html-welcome(%project-butterfly);
+}
+
 subtest 'platform start', {
     plan 2;
     my $proc = run <bin/platform>, "--data-path=$tmpdir/.platform", <start>, :out;
@@ -67,6 +71,8 @@ subtest 'platform start project-butterfly', {
 subtest 'platform stop project-butterfly', {
     plan 1;
     run <bin/platform>, "--project=$tmpdir/project-butterfly", "--data-path=$tmpdir/.platform", <stop>;
+    # TODO: get result from <docker ps>
+    ok True, 'project stopped';
 }
 
 # $proc.out.close;

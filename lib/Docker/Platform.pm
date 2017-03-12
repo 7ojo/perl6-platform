@@ -1,6 +1,7 @@
 use v6.c;
 use Docker::Platform::Service::DNS;
 use Text::Wrap;
+use YAMLish;
 
 class Docker::Platform {
 
@@ -27,14 +28,19 @@ class Docker::Platform {
             say "ERROR: Can't read $project-dir directory";
             exit;
         }
-        # Find Dockerfile
+        # Find Dockerfilie
         my $dockerfile-path;
+        my $projectyml-path;
         for "$project-dir/docker", $project-dir {
-            if "$_/Dockerfile".IO.e {
+            if not $dockerfile-path and "$_/Dockerfile".IO.e {
                 $dockerfile-path = $_;
-                last;
+            }
+            if not $projectyml-path and "$_/project.yml".IO.e {
+                $projectyml-path = "$_/project.yml";
             }
         }
+        my $conf = load-yaml $projectyml-path.IO.slurp;
+
         # Build docker image
         my $proc = run <docker build -t>, $project-name, <.>, :cwd«$dockerfile-path», :out;
         my $out = $proc.out.slurp-rest;
@@ -45,15 +51,15 @@ class Docker::Platform {
         }
 
         # Run docker image
-        # TODO: Specify volumes somewhere
-        my $volume = 'html:/usr/share/nginx/html:ro';
-        $volume = $project-dir.IO.abspath ~ "/$volume";
-        # TODO: Specify custom command somewhere
-        my $command = "nginx -g 'daemon off;'";
-
-        # TODO: Why run <..> doesn't work? docker needs shell?
+        my $volumes = '';
+        if $conf<volumes> {
+            my @volumes = map { $project-dir.IO.abspath ~ '/' ~ $_ }, $conf<volumes>.Array;
+            $volumes = "--volume '" ~ join(" --volume '", @volumes) ~ "'";
+        }
+        my $command = $conf<command> ?? $conf<command> !! '/bin/bash';
+        # TODO: Why run <..> doesn't work? docker needs shell or just doing something wrong?
         my $hostname = $project-name ~ '.' ~ $.domain;
-        $proc = shell "docker run --env VIRTUAL_HOST=$hostname -detach --interactive=true --tty=true --rm --hostname $hostname --name $project-name --volume '$volume' $project-name $command", :out;
+        $proc = shell "docker run --env VIRTUAL_HOST=$hostname -detach --interactive=true --tty=true --rm --hostname $hostname --name $project-name {$volumes} {$project-name} {$command}", :out;
         $out = $proc.out.slurp-rest;
     }
 
