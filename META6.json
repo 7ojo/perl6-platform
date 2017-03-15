@@ -2,7 +2,7 @@
     "perl"          : "6",
     "name"          : "Platform",
     "version"       : "0.0.1",
-    "description"   : "Tool for managing running single projects or tightly coupled projects via Docker environment",
+    "description"   : "Tool for managing and running single projects or tightly coupled projects via Docker environment",
     "authors"       : [ "Jarkko Haapalainen <jarkko@viidakko.fi>" ],
     "auth"          : "github:7ojo",
     "tags"          : [ "Platform", "Docker", "Tool", "Development" ],

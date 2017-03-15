@@ -16,10 +16,10 @@ Tool for managing and running single projects or tightly coupled projects via Do
 
     $ platform ssl genrsa
     $ platform ssh keygen
-    $ platform start
-    $ platform --project=butterfly-project/ start
-    $ platform --project=butterfly-project/ stop
-    $ platform stop
+    $ platform create
+    $ platform --environment my-projects.yml run|start|stop|rm
+    $ platform --project=butterfly-project/ run|start|stop|rm
+    $ platform destroy
 
 # References
 
