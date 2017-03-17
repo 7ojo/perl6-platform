@@ -21,6 +21,13 @@ Tool for managing and running single projects or tightly coupled projects via Do
     $ platform --project=butterfly-project/ run|start|stop|rm
     $ platform destroy
 
+# Todo
+
+* Change order of parameters to "bin/platform <command> [<params> ..]" somehow, but should be possible. I think.
+* Environment setup -- Possible to define complete environment with multiple projects and configuration
+* SSH authentication setup between containers
+* Sudoers setup inside container
+
 # References
 
 1. [zetaron/docker-dns-gen](//github.com/zetaron/docker-dns-gen)
