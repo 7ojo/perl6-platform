@@ -3,7 +3,7 @@ use lib 't/lib';
 use Test;
 use Template;
 
-plan 6;
+plan 5;
 
 constant AUTHOR = ?%*ENV<AUTHOR_TESTING>;
 
@@ -34,9 +34,9 @@ ok $tmpdir.IO.e, "got $tmpdir";
     spurt "$tmpdir/project-butterfly/html/index.html", html-welcome(%project-butterfly);
 }
 
-subtest 'platform start', {
+subtest 'platform create', {
     plan 2;
-    my $proc = run <bin/platform>, "--data-path=$tmpdir/.platform", <start>, :out;
+    my $proc = run <bin/platform>, "--data-path=$tmpdir/.platform", <create>, :out;
     my $out = $proc.out.slurp-rest;
     ok $out ~~ / DNS \s+ \[ \✔ \] /, 'service dns is up';
     ok $out ~~ / Proxy \s+ \[ \✔ \] /, 'service proxy is up';
@@ -59,28 +59,32 @@ subtest 'platform ssh keygen', {
     plan 3;
     run <bin/platform>, "--data-path=$tmpdir/.platform", <ssh keygen>;
     ok "$tmpdir/.platform/local/ssh".IO.e, '<data>/local/ssh exists';
-    for <id_rsa id_rsa.pub> -> $file {
-        ok "$tmpdir/.platform/local/ssh/$file".IO.e, "<data>/local/ssh/$file exists";
-    }
+    ok "$tmpdir/.platform/local/ssh/$_".IO.e, "<data>/local/ssh/$_ exists" for <id_rsa id_rsa.pub>;
 }
 
-subtest 'platform start project-butterfly', {
-    plan 1;
-    run <bin/platform>, "--project=$tmpdir/project-butterfly", "--data-path=$tmpdir/.platform", <start>;
+subtest 'platform run|stop|start|rm project-butterfly', {
+    plan 4;
+    my $proc = run <bin/platform>, "--project=$tmpdir/project-butterfly", "--data-path=$tmpdir/.platform", <run>, :out;
+    ok $proc.out.slurp-rest.Str ~~ / butterfly \s+ \[ \✔ \] /, 'project butterfly is up';
 
-    sleep 3; # project to start
+    sleep 1.5; # project to start
 
-    my $proc = run <host project-butterfly.local localhost>, :out;
+    $proc = run <host project-butterfly.local localhost>, :out;
     my $out = $proc.out.slurp-rest;
     my $found = $out.lines[*-1] ~~ / address \s $<ip-address> = [ \d+\.\d+\.\d+\.\d+ ] $$ /;
     ok $found, 'got ip-address ' ~ ($found ?? $/.hash<ip-address> !! '');
-}
 
-subtest 'platform stop project-butterfly', {
-    plan 1;
     run <bin/platform>, "--project=$tmpdir/project-butterfly", "--data-path=$tmpdir/.platform", <stop>;
-    # TODO: get result from <docker ps>
-    ok True, 'project stopped';
+
+    $proc = run <bin/platform>, "--project=$tmpdir/project-butterfly", "--data-path=$tmpdir/.platform", <start>, :out;
+    ok $proc.out.slurp-rest ~~ / butterfly \s+ \[ \✔ \] /, 'project butterfly is up';
+
+    run <bin/platform>, "--project=$tmpdir/project-butterfly", "--data-path=$tmpdir/.platform", <stop>;
+
+    run <bin/platform>, "--project=$tmpdir/project-butterfly", "--data-path=$tmpdir/.platform", <rm>;
+
+    $proc = run <bin/platform>, "--project=$tmpdir/project-butterfly", "--data-path=$tmpdir/.platform", <rm>, :out;
+    ok $proc.out.slurp-rest.Str ~~ / No \s such \s container /, 'got error message'
 }
 
 # $proc.out.close;
@@ -96,6 +100,7 @@ subtest 'platform stop project-butterfly', {
 #mkdir "$tmpdir/project-snail/docker";
 #spurt "$tmpdir/project-snail/docker/Makefile", docker-makefile("Project \c[SNAIL]");
 
-run <bin/platform stop>, :out;
+run <bin/platform destroy>;
+
 run <rm -rf>, $tmpdir;
 # say $tmpdir;

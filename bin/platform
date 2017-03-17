@@ -3,32 +3,46 @@
 use v6;
 use lib 'lib';
 
-sub load-module(:$name, :$domain, :$data-path) {
+multi sub load-module(:$name, :$domain, :$data-path) {
     require ::($name);
     ::($name).new(:$domain, :$data-path);
 }
 
-#| Start platform
-# Example: $ platform start
-# Example: $ platform start -p project-butterfly
-# Example: $ platform start -c custom-setup.yml -p project-butterfly
-multi sub MAIN('start', Str :$project?, Str :$config?, Str :$domain = 'local', Str :$data-path = '~/.platform') {
-    # TODO: Figure this out how to do this without if-statement
-    if $project {
-        load-module(:name<Platform>, :$domain, :$data-path).start($project);
-    } else {
-        load-module(:name<Platform>, :$domain, :$data-path).start;
-    }
+multi sub load-module(:$name, :$domain, :$data-path, :$project) {
+    require ::($name);
+    ::($name).new(:$domain, :$data-path, :$project);
 }
 
-#| Stop platform
-multi sub MAIN('stop', Str :$project?, Str :$domain = 'local', Str :$data-path = '~/.platform') {
-    # TODO: Figure this out how to do this without if-statement
-    if $project {
-        load-module(:name<Platform>, :$domain, :$data-path).stop($project);
-    } else {
-        load-module(:name<Platform>, :$domain, :$data-path).stop;
-    }
+#| Start shared platform services
+multi sub MAIN('create', Str :$domain = 'local', Str :$data-path = '~/.platform') {
+    put "Platform";
+    put $_.as-string for load-module(:name<Platform>, :$domain, :$data-path).create.Array;
+}
+
+#| Shutdown shared platform services
+multi sub MAIN('destroy', Str :$domain = 'local', Str :$data-path = '~/.platform') {
+    load-module(:name<Platform>, :$domain, :$data-path).destroy;
+}
+
+#| Initialize and run project
+multi sub MAIN('run', Str :$project, Str :$config?, Str :$domain = 'local', Str :$data-path = '~/.platform') {
+    put "Platform\n" ~ load-module(:name<Platform::Project>, :$domain, :$data-path, :$project).run.as-string;
+}
+
+#| Start suspended project
+multi sub MAIN('start', Str :$project, Str :$config?, Str :$domain = 'local', Str :$data-path = '~/.platform') {
+    put "Platform\n" ~ load-module(:name<Platform::Project>, :$domain, :$data-path, :$project).start.as-string;
+}
+
+#| Stop running project 
+multi sub MAIN('stop', Str :$project, Str :$domain = 'local', Str :$data-path = '~/.platform') {
+    load-module(:name<Platform::Project>, :$domain, :$data-path, :$project).stop;
+}
+
+#| Remove stopped project
+multi sub MAIN('rm', Str :$project, Str :$domain = 'local', Str :$data-path = '~/.platform') {
+    my $obj = load-module(:name<Platform::Project>, :$domain, :$data-path, :$project).rm;
+    put "Platform\n" ~ $obj.as-string if $obj.last-result<err>.chars > 0;
 }
 
 #| Generation of RSA Private Key
