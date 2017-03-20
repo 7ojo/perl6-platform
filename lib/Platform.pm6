@@ -14,7 +14,9 @@ class Platform is Platform::Container {
     method ssl('genrsa') {
         my $ssl-dir = $.data-path ~ '/ssl';
         mkdir $ssl-dir if not $ssl-dir.IO.e;
-        run <openssl genrsa -out>, "$ssl-dir/server-key.key", <4096>;
+        my $proc = run <openssl genrsa -out>, "$ssl-dir/server-key.key", <4096>, :out, :err;
+        my $out = $proc.out.slurp-rest;
+        my $err = $proc.err.slurp-rest;
         run <openssl rsa -in>, "$ssl-dir/server-key.key", <-out>, "$ssl-dir/server-key.crt";
     }
 
