@@ -2,8 +2,9 @@ use v6.c;
 use lib 't/lib';
 use Test;
 use Template;
+use nqp;
 
-plan 5;
+plan 7;
 
 constant AUTHOR = ?%*ENV<AUTHOR_TESTING>;
 
@@ -13,26 +14,30 @@ if not AUTHOR {
 }
 
 my $tmpdir = $*TMPDIR ~ '/test-docker-platform-10-setup';
+run <rm -rf>, $tmpdir if $tmpdir.IO.e;
 mkdir $tmpdir;
 
 ok $tmpdir.IO.e, "got $tmpdir";
 
-{ # Setup project files for project-butterfly
-    my %project-butterfly =
-        title => "Project \c[BUTTERFLY]",
-        name => "project-butterfly"
+sub create-project(Str $animal) {
+    my $project-dir = $tmpdir ~ "/project-" ~ $animal.lc;
+    my %project =
+        title => "Project " ~ nqp::getstrfromname($animal.uc),
+        name => "project-" ~ $animal.lc
     ;
-    mkdir "$tmpdir/project-butterfly/docker";
-    spurt "$tmpdir/project-butterfly/docker/Dockerfile", docker-dockerfile(%project-butterfly);
+    mkdir "$project-dir/docker";
+    spurt "$project-dir/docker/Dockerfile", docker-dockerfile(%project);
     my $project-yml = q:heredoc/END/;
-    command: nginx -g 'daemon off;'
-    volumes:
-        - html:/usr/share/nginx/html:ro
-    END
-    spurt "$tmpdir/project-butterfly/docker/project.yml", $project-yml;
-    mkdir "$tmpdir/project-butterfly/html";
-    spurt "$tmpdir/project-butterfly/html/index.html", html-welcome(%project-butterfly);
+command: nginx -g 'daemon off;'
+volumes:
+    - html:/usr/share/nginx/html:ro
+END
+    spurt "$project-dir/docker/project.yml", $project-yml;
+    mkdir "$project-dir/html";
+    spurt "$project-dir/html/index.html", html-welcome(%project);
 }
+
+create-project('butterfly');
 
 subtest 'platform create', {
     plan 2;
@@ -67,7 +72,7 @@ subtest 'platform run|stop|start|rm project-butterfly', {
     my $proc = run <bin/platform>, "--project=$tmpdir/project-butterfly", "--data-path=$tmpdir/.platform", <run>, :out;
     ok $proc.out.slurp-rest.Str ~~ / butterfly \s+ \[ \✔ \] /, 'project butterfly is up';
 
-    sleep 1.5; # project to start
+    sleep 1.5; # wait project to start
 
     $proc = run <host project-butterfly.local localhost>, :out;
     my $out = $proc.out.slurp-rest;
@@ -87,20 +92,37 @@ subtest 'platform run|stop|start|rm project-butterfly', {
     ok $proc.out.slurp-rest.Str ~~ / No \s such \s container /, 'got error message'
 }
 
-# $proc.out.close;
-#say $proc.out.slurp-rest;
+create-project('snail');
 
-# TODO: docker run -d -p 80:80 -v /var/run/docker.sock:/tmp/docker.sock:ro jwilder/nginx-proxy
+subtest 'platform run butterfly|snail', {
+    plan 4;
+    for <butterfly snail> -> $project {
+        my $proc = run <bin/platform>, "--project=$tmpdir/project-$project", "--data-path=$tmpdir/.platform", <run>, :out;
+        ok $proc.out.slurp-rest.Str ~~ / $project \s+ \[ \✔ \] /, "project $project is up";
+    }
 
-# Start project
-# TODO: run <bin/platform start>, $tmpdir/project-butterfly
-# TODO: run <bin/platform start>, $tmpdir/*
+    sleep 1.5; # wait projects to start
 
-# Platform project-snail
-#mkdir "$tmpdir/project-snail/docker";
-#spurt "$tmpdir/project-snail/docker/Makefile", docker-makefile("Project \c[SNAIL]");
+    for <butterfly snail> -> $project {
+        my $proc = run <host>, 'project-' ~ $project ~ '.local', <localhost>, :out;
+        my $out = $proc.out.slurp-rest;
+        my $found = $out.lines[*-1] ~~ / address \s $<ip-address> = [ \d+\.\d+\.\d+\.\d+ ] $$ /;
+        ok $found, 'got ip-address ' ~ ($found ?? $/.hash<ip-address> !! '') ~ " for $project";
+    }
+}
+
+# TODO: Sudoers+platorc account setup
+
+# TODO: SSL public key authentication setup
+
+subtest 'platform stop|rm butterfly|snail', {
+    plan 2;
+    for <butterfly snail> -> $project {
+        run <bin/platform>, "--project=$tmpdir/project-$project", "--data-path=$tmpdir/.platform", <stop>;
+        run <bin/platform>, "--project=$tmpdir/project-$project", "--data-path=$tmpdir/.platform", <rm>;
+        ok 1, "stop+rm for project $project";
+    }
+}
 
 run <bin/platform destroy>;
 
-run <rm -rf>, $tmpdir;
-# say $tmpdir;
