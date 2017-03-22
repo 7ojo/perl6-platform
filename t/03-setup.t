@@ -13,7 +13,7 @@ if not AUTHOR {
      exit;
 }
 
-my $tmpdir = $*TMPDIR ~ '/test-docker-platform-10-setup';
+my $tmpdir = $*TMPDIR ~ '/test-platform-03-setup';
 run <rm -rf>, $tmpdir if $tmpdir.IO.e;
 mkdir $tmpdir;
 
@@ -28,10 +28,10 @@ sub create-project(Str $animal) {
     mkdir "$project-dir/docker";
     spurt "$project-dir/docker/Dockerfile", docker-dockerfile(%project);
     my $project-yml = q:heredoc/END/;
-command: nginx -g 'daemon off;'
-volumes:
-    - html:/usr/share/nginx/html:ro
-END
+        command: nginx -g 'daemon off;'
+        volumes:
+            - html:/usr/share/nginx/html:ro
+        END
     spurt "$project-dir/docker/project.yml", $project-yml;
     mkdir "$project-dir/html";
     spurt "$project-dir/html/index.html", html-welcome(%project);
