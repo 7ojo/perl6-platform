@@ -65,6 +65,7 @@ sub create-project(Str $animal) {
           /etc/liana/lianamailer/installer.ini: |
             [default]
             host = ui.mailer.local
+            
             [ui.mailer.local]
             path = /home/mailer/git/lianamailer-ui
         END

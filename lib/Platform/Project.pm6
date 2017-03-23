@@ -44,6 +44,40 @@ class Platform::Project is Platform::Container {
             put $out if not $last-line ~~ / Successfully \s built /;
         }
 
+        { # PHASE: add users to image if any
+            my @cmds;
+            my $variant = "$dockerfile-path/Dockerfile".IO.slurp ~~ / ^ FROM \s .* alpine / ?? 'alpine' !! 'debian';
+            my $shell = $variant eq 'alpine' ?? 'ash -c' !! 'bash -c';
+            for $config<users>.Hash.kv -> $login, %params {
+                if %params<home> {
+                    @cmds.push: 'mkdir -p ' ~ %params<home>.IO.dirname;
+                }
+                my @cmd = [ 'adduser' ];
+                if $variant eq 'alpine' {
+                    @cmd.push: "-h {%params<home>}" if %params<home>;
+                    @cmd.push: "-g \"{%params<gecos>}\"" if %params<gecos>;
+                    @cmd.push: '-S' if %params<system>;
+                    @cmd.push: '-D' if not %params<password>;
+                    @cmd.push: $login;
+                    @cmds.push: @cmd.join(' ');
+                } else {
+                    @cmd.push: "--home {%params<home>}" if %params<home>;
+                    @cmd.push: "--gecos \"{%params<gecos>}\"" if %params<gecos>;
+                    @cmd.push: '--system' if %params<system>;
+                    @cmd.push: '--disabled-password' if not %params<password>;
+                    @cmd.push: '--quiet';
+                    @cmd.push: $login;
+                    @cmds.push: @cmd.join(' ');
+                }
+            }
+            my $proc = shell "docker run --name {self.name} {self.name} {$shell} '{@cmds.join(' ; ')}'", :out, :err;
+            my $out = $proc.out.slurp-rest;
+            $proc = run <docker commit>, self.name, self.name, :out;
+            $out = $proc.out.slurp-rest;
+            $proc = run <docker rm>, self.name, :out;
+            $out = $proc.out.slurp-rest;
+        } if $config<users>;
+
         # Extra parameters
         my @extra-args;
 
@@ -67,7 +101,6 @@ class Platform::Project is Platform::Container {
         # PHASE: run
         my @args = flat @env, @volumes, @extra-args;
         my $cmd = "docker run -dit -h {self.hostname} --name {self.name} {@args.join(' ')} {self.name} {$config<command>}";
-        say $cmd;
         self.last-command: shell $cmd, :out, :err;
     }
 
