@@ -39,39 +39,44 @@ sub create-project(Str $animal) {
           - build-arg SYSTEMD=0
         volumes:
           # <from>:<to> if <from> is empty, defaults to root e.g. '.'
-          - :/home/cem/git
-          - :/var/www/auth
+          - :/var/www/app
           - html:/usr/share/nginx/local:ro
-        # TODO
         users:
           platorc:
             system: true
             home: /var/lib/auth/platorc
-        # TODO
         ssh:
-            id_rsa.pub: /var/lib/auth/platorc/.ssh/authorized_keys
-        # TODO
+          # <target>: <content>
+          /var/lib/auth/platorc/.ssh/authorized_keys:
+            content: id_rsa.pub
+            owner: platorc
+            group: nobody
         sudoers:
-          auth-lianamailer-installer:
-            user: platorc
-            command: /usr/share/lianacem/ui/bin/installer
-            runas: www-data:www-data
-        # TODO
+          # <target>: <content>
+          /etc/sudoers.d/app-installer: |
+            platorc ALL=(www-data:www-data) NOPASSWD: /var/www/app/bin/installer
         files:
+          # <target>: <content>
+          /var/www/app/config:
+            readonly: true
+            content: |
+              <?php
+              $hello = "こんにちは!";
           /etc/install.ini: |
             foo
             bar
             kaa
-          /etc/liana/lianamailer/installer.ini: |
+          /etc/foo/bar/config.ini: |
             [default]
-            host = ui.mailer.local
+            host = project-honeybee.local
             
-            [ui.mailer.local]
-            path = /home/mailer/git/lianamailer-ui
+            [ui.project-honeybee.local]
+            path = /var/www/app/ui
         END
     spurt "$project-dir/docker/project.yml", $project-yml;
     mkdir "$project-dir/html";
     spurt "$project-dir/html/index.html", html-welcome(%project);
+    spurt "$project-dir/config", '<?php $hello = "Hello world!"';
 }
 
 create-project('honeybee');

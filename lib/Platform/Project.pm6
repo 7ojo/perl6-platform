@@ -77,12 +77,64 @@ class Platform::Project is Platform::Container {
             $proc = run <docker rm>, self.name, :out;
             $out = $proc.out.slurp-rest;
         } if $config<users>;
-
+        
         # Extra parameters
         my @extra-args;
 
         # Volume mapping
         my @volumes = map { '--volume ' ~ self.project.IO.abspath ~ '/' ~ $_ }, $config<volumes>.Array;
+
+        { # PHASE: create files to host and mount them inside container
+            if $config<ssh> {
+                my $path = self.data-path ~ '/' ~ self.domain ~ "/ssh";
+                for $config<ssh>.Hash.kv -> $target, $content is rw {
+                    if not $path.IO.e {
+                        put "No SSH keys available. Maybe you should run:\n\n  platform --data-path={self.data-path} --domain={self.domain} ssh keygen\n";
+                        exit;
+                    }
+                    my ($owner, $group);
+                    if $content ~~ Hash {
+                        $owner = $content<owner> if $content<owner>;
+                        $group = $content<group> if $content<group>;
+                        $content = $content<content>;
+                    }
+                    if "$path/$content".IO.e {
+                        run <docker run --name>, self.name, self.name, 'mkdir', $target.IO.dirname; 
+                        run <docker cp>, "$path/$content", self.name ~ ":$target";
+                        run <docker commit>, self.name, self.name;
+                        run <docker rm>, self.name;
+
+                        if $owner and $group {
+                            run <docker run --name>, self.name, self.name, 'chown', '-R', "$owner:$group", $target.IO.dirname;
+                            run <docker commit>, self.name, self.name;
+                            run <docker rm>, self.name;
+                        }
+
+                        run <docker run --name>, self.name, self.name, 'chmod', '-R', 'go-rwx', $target.IO.dirname;
+                        run <docker commit>, self.name, self.name;
+                        run <docker rm>, self.name;
+                    }
+                    
+                }
+            }
+            for <sudoers files> -> $group {
+                for $config{$group}.Hash.kv -> $target, $content is rw {
+                    my $path = self.data-path ~ '/' ~ self.domain ~ "/$group";
+                    my Str $flags = '';
+                    if $content ~~ Hash {
+                        $flags ~= ':ro' if $content<readonly>;
+                        $content = $content<content>;
+                    }
+                    if "$path/$content".IO.e {
+                        $content = "$path/$content".IO.slurp;
+                    }
+                    mkdir "$path/{self.name}/" ~ $target.IO.dirname;
+                    spurt "$path/{self.name}/{$target}", $content;
+                    @volumes.push: "--volume $path/{self.name}/{$target}:{$target}{$flags}";    
+                }
+            }
+        }
+        say @volumes; 
 
         # Type of docker image e.g systemd
         if $config<type> and $config<type> eq 'systemd' {
