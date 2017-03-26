@@ -45,19 +45,22 @@ sub create-project(Str $animal) {
           platorc:
             system: true
             home: /var/lib/auth/platorc
-        ssh:
-          # <target>: <content>
+        dirs:
+          /var/lib/auth/platorc/.ssh:
+            owner: platorc
+            group: nobody
+            mode: 0700
+        files:
+          /etc/sudoers.d/app-installer: |
+            platorc ALL=(www-data:www-data) NOPASSWD: /var/www/app/bin/installer
           /var/lib/auth/platorc/.ssh/authorized_keys:
             content: id_rsa.pub
             owner: platorc
             group: nobody
-        sudoers:
-          # <target>: <content>
-          /etc/sudoers.d/app-installer: |
-            platorc ALL=(www-data:www-data) NOPASSWD: /var/www/app/bin/installer
-        files:
+            mode: 0600
           # <target>: <content>
           /var/www/app/config:
+            volume: true
             readonly: true
             content: |
               <?php
@@ -87,6 +90,13 @@ subtest 'platform create', {
     my $out = $proc.out.slurp-rest;
     ok $out ~~ / DNS \s+ \[ \✔ \] /, 'service dns is up';
     ok $out ~~ / Proxy \s+ \[ \✔ \] /, 'service proxy is up';
+}
+
+subtest 'platform ssh keygen', {
+    plan 3;
+    run <bin/platform>, "--data-path=$tmpdir/.platform", <ssh keygen>;
+    ok "$tmpdir/.platform/local/ssh".IO.e, '<data>/local/ssh exists';
+    ok "$tmpdir/.platform/local/ssh/$_".IO.e, "<data>/local/ssh/$_ exists" for <id_rsa id_rsa.pub>;
 }
 
 subtest 'platform run', {
