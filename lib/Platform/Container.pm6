@@ -9,7 +9,6 @@ class Platform::Container {
     has Str $.data-path is rw;
     has Str $.projectdir;
     has Hash $.config-data;
-    has Proc $.last-proc is rw;
     has %.last-result;
 
     method result-as-hash($proc) {
@@ -23,9 +22,7 @@ class Platform::Container {
     }
 
     method last-command($proc?) {
-        my $curr-proc = $proc ?? $proc !! $.last-proc;
-        %.last-result = self.result-as-hash($curr-proc);
-        $.last-proc = $curr-proc;
+        %.last-result = self.result-as-hash($proc) if $proc;
         self;
     }
 

@@ -1,7 +1,7 @@
 use v6;
-use Platform::Docker::Container;
+use Platform::Container;
 
-class Platform::Docker::Proxy is Platform::Docker::Container {
+class Platform::Docker::Proxy is Platform::Container {
 
     has Str $.name = 'Proxy';
 

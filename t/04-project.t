@@ -4,7 +4,7 @@ use Test;
 use Template;
 use nqp;
 
-plan 4;
+plan 5;
 
 constant AUTHOR = ?%*ENV<AUTHOR_TESTING>;
 
