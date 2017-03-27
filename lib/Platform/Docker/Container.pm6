@@ -129,7 +129,6 @@ class Platform::Docker::Container is Platform::Container {
     }
 
     method run {
-         say @.volumes; 
         my $config = self.config-data;
 
         # Type of docker image e.g systemd

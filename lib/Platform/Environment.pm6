@@ -1,0 +1,35 @@
+use v6;
+use Platform::Project;
+use YAMLish;
+
+class Platform::Environment {
+
+    has Str $.domain = 'local';
+    has Str $.data-path is rw;
+    has Str $.environment;
+    has Platform::Project @.projects;
+    has Platform::Container @.containers;
+   
+    submethod TWEAK {
+        my $config = load-yaml $!environment.IO.slurp;
+        for $config.Hash.kv -> $project, $data {
+            my $project-path = $project ~~ / ^ \/ / ?? $project !! "{self.environment.IO.dirname}/{$project}".IO.abspath;
+            if ($data ~~ Bool and $data) {
+                @!projects.push: Platform::Project.new(:domain($!domain), :data-path($!data-path), :project($project-path));
+            } else {
+                say "DO NOTHING";
+            }
+        }
+    }
+ 
+    method run { @.projects.map: { @.containers.push(.run) }; self }
+
+    method start { @.projects.map: { @.containers.push(.start) }; self }
+
+    method stop { @.projects.map: { @.containers.push(.stop) }; self }
+
+    method rm { @.projects.map: { @.containers.push(.rm) }; self }
+
+    method as-string { @.containers.map({.as-string}).join("\n") }
+
+}
