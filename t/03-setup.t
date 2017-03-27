@@ -111,10 +111,6 @@ subtest 'platform run butterfly|snail', {
     }
 }
 
-# TODO: Sudoers+platorc account setup
-
-# TODO: SSL public key authentication setup
-
 subtest 'platform stop|rm butterfly|snail', {
     plan 2;
     for <butterfly snail> -> $project {

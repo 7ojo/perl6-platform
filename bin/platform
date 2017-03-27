@@ -24,7 +24,7 @@ multi sub MAIN('destroy', Str :$domain = 'local', Str :$data-path = '~/.platform
     load-module(:name<Platform>, :$domain, :$data-path).destroy;
 }
 
-#| Initialize and run project
+#| Initialize and run single project
 multi sub MAIN('run', Str :$project, Str :$config?, Str :$domain = 'local', Str :$data-path = '~/.platform') {
     put "Platform\n" ~ load-module(:name<Platform::Project>, :$domain, :$data-path, :$project).run.as-string;
 }
@@ -45,6 +45,31 @@ multi sub MAIN('rm', Str :$project, Str :$domain = 'local', Str :$data-path = '~
     put "Platform\n" ~ $obj.as-string if $obj.last-result<err>.chars > 0;
 }
 
+#| Initialize and run environment
+multi sub MAIN('run', Str :$environment, Str :$config?, Str :$domain = 'local', Str :$data-path = '~/.platform') {
+    say "environment run";
+    # put "Platform\n" ~ load-module(:name<Platform::Project>, :$domain, :$data-path, :$project).run.as-string;
+}
+
+#| Start suspended environment
+multi sub MAIN('start', Str :$environment, Str :$config?, Str :$domain = 'local', Str :$data-path = '~/.platform') {
+    say "environment start";
+    # put "Platform\n" ~ load-module(:name<Platform::Project>, :$domain, :$data-path, :$project).start.as-string;
+}
+
+#| Stop running environment
+multi sub MAIN('stop', Str :$environment, Str :$domain = 'local', Str :$data-path = '~/.platform') {
+    say "environment stop";
+    # load-module(:name<Platform::Project>, :$domain, :$data-path, :$project).stop;
+}
+
+#| Remove stopped environment
+multi sub MAIN('rm', Str :$environment, Str :$domain = 'local', Str :$data-path = '~/.platform') {
+    say "environment rm";
+    # my $obj = load-module(:name<Platform::Project>, :$domain, :$data-path, :$project).rm;
+    # put "Platform\n" ~ $obj.as-string if $obj.last-result<err>.chars > 0;
+}
+
 #| Generation of RSA Private Key
 multi sub MAIN('ssl', 'genrsa', Str :$domain = 'local', Str :$data-path = '~/.platform') {
     load-module(:name<Platform>, :$domain, :$data-path).ssl('genrsa');
@@ -54,12 +79,4 @@ multi sub MAIN('ssl', 'genrsa', Str :$domain = 'local', Str :$data-path = '~/.pl
 multi sub MAIN('ssh', 'keygen', Str :$domain = 'local', Str :$data-path = '~/.platform') {
     load-module(:name<Platform>, :$domain, :$data-path).ssh('keygen'); 
 }
-
-# #| TODO: ssh connect
-# Example: $ platform ssh connect --from=project-butterfly --to=project-snail --user=platorc
-# multi sub MAIN('ssh', 'connect', Str :$from!, Str :$to!, Str :$user = 'platorc') {}
-
-# #| Setup passwordless SUDO commands for account
-# Example: $ platform sudo grant -p project-butterfly -u platorc -h ALL -r '(www-data:www-data)' -c '/bin/installer'
-# multi sub MAIN('sudo', 'grant', Str :p(:$project)!, Str :u(:$user) = 'platorc', Str :h(:$host) = 'ALL', Str :r(:$runas) = 'ALL', Str :c(:$command)!) {}
 

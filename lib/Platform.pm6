@@ -23,7 +23,7 @@ class Platform is Platform::Container {
     method ssh('keygen') {
         my $ssh-dir = $.data-path ~ '/ssh';
         mkdir $ssh-dir if not $ssh-dir.IO.e;
-        shell "ssh-keygen -t rsa -q -N '' -f $ssh-dir/id_rsa"; # TODO: why i can't get this work with run <>
+        run <ssh-keygen -t rsa -q -N>, '', '-f', "$ssh-dir/id_rsa";
     }
 
     submethod BUILD {
