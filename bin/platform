@@ -67,8 +67,6 @@ multi sub MAIN('stop', Str :$environment, Str :$domain = 'local', Str :$data-pat
 
 #| Remove stopped environment
 multi sub MAIN('rm', Str :$environment, Str :$domain = 'local', Str :$data-path = '~/.platform') {
-    # my $obj = load-module(:name<Platform::Project>, :$domain, :$data-path, :$project).rm;
-    # put "Platform\n" ~ $obj.as-string if $obj.last-result<err>.chars > 0;
     put "Platform\n" ~ load-module(:name<Platform::Environment>, :$domain, :$data-path, :$environment).rm.as-string;
 }
 
