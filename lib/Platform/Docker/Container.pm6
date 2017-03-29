@@ -39,7 +39,8 @@ class Platform::Docker::Container is Platform::Container {
         return if not self.config-data<users>;
         my @cmds;
         my $config = self.config-data;
-        for $config<users>.Hash.kv -> $login, %params {
+        for $config<users>.Hash.kv -> $login, $params {
+            my %params = $params ~~ Hash ?? $params.hash !! ();
             if %params<home> {
                 @cmds.push: 'mkdir -p ' ~ %params<home>.IO.dirname;
             }
@@ -47,6 +48,7 @@ class Platform::Docker::Container is Platform::Container {
             if $.variant eq 'alpine' {
                 @cmd.push: "-h {%params<home>}" if %params<home>;
                 @cmd.push: "-g \"{%params<gecos>}\"" if %params<gecos>;
+                @cmd.push: "-s \"{%params<shell>}\"" if %params<shell>;
                 @cmd.push: '-S' if %params<system>;
                 @cmd.push: '-D' if not %params<password>;
                 @cmd.push: $login;
@@ -54,6 +56,7 @@ class Platform::Docker::Container is Platform::Container {
             } else {
                 @cmd.push: "--home {%params<home>}" if %params<home>;
                 @cmd.push: "--gecos \"{%params<gecos>}\"" if %params<gecos>;
+                @cmd.push: "--shell \"{%params<shell>}\"" if %params<shell>;
                 @cmd.push: '--system' if %params<system>;
                 @cmd.push: '--disabled-password' if not %params<password>;
                 @cmd.push: '--quiet';
@@ -93,7 +96,8 @@ class Platform::Docker::Container is Platform::Container {
             put "No SSH keys available. Maybe you should run:\n\n  platform --data-path={self.data-path} --domain={self.domain} ssh keygen\n";
             exit;
         }
-        run <docker run -d -it --name>, self.name, self.name, '/bin/ash';
+        my $proc = run <docker run -d -it --name>, self.name, self.name, self.shell, :out;
+        my $out = $proc.out.slurp-rest;
         my $path = self.data-path ~ '/' ~ self.domain ~ "/files";
         for $config<files>.Hash.kv -> $target, $content is rw {
             my ($owner, $group, $mode);
@@ -111,6 +115,7 @@ class Platform::Docker::Container is Platform::Container {
                     $owner   = $content<owner> if $content<owner>;
                     $group   = $content<group> if $content<group>;
                     $mode    = $content<mode>  if $content<mode>;
+                    $content = $content<content>;
                     temp $path = $path.IO.dirname;
                     $content = "$path/$content".IO.slurp if "$path/$content".IO.e;
                 }
@@ -123,9 +128,12 @@ class Platform::Docker::Container is Platform::Container {
             run <docker exec>, self.name, 'chown', "$owner:$group", $target if $owner and $group;
             run <docker exec>, self.name, 'chmod', $mode, $target if $mode;
         }
-        run <docker stop -t 0>, self.name; 
-        run <docker commit>, self.name, self.name;
-        run <docker rm>, self.name;
+        $proc = run <docker stop -t 0>, self.name, :out; 
+        $out = $proc.out.slurp-rest;
+        $proc = run <docker commit>, self.name, self.name, :out;
+        $out = $proc.out.slurp-rest;
+        $proc = run <docker rm>, self.name, :out;
+        $out = $proc.out.slurp-rest;
     }
 
     method run {

@@ -14,10 +14,15 @@ class Platform::Environment {
         my $config = load-yaml $!environment.IO.slurp;
         for $config.Hash.kv -> $project, $data {
             my $project-path = $project ~~ / ^ \/ / ?? $project !! "{self.environment.IO.dirname}/{$project}".IO.abspath;
-            if ($data ~~ Bool and $data) {
+            if $data ~~ Bool and $data {
                 @!projects.push: Platform::Project.new(:domain($!domain), :data-path($!data-path), :project($project-path));
-            } else {
-                say "DO NOTHING";
+            } elsif $data ~~ Hash {
+                @!projects.push: Platform::Project.new(
+                    :domain($!domain),
+                    :data-path($!data-path),
+                    :project($project-path),
+                    :override($data.Hash)
+                    );
             }
         }
     }

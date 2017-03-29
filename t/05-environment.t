@@ -4,7 +4,7 @@ use Test;
 use Template;
 use nqp;
 
-plan 7;
+plan 8;
 
 constant AUTHOR = ?%*ENV<AUTHOR_TESTING>;
 
@@ -35,6 +35,24 @@ sub create-project(Str $animal) {
     spurt "$project-dir/docker/project.yml", $project-yml;
     mkdir "$project-dir/html";
     spurt "$project-dir/html/index.html", html-welcome(%project);
+    $project-dir;
+}
+
+sub create-ssh-project(Str $animal) {
+    my $project-dir = create-project($animal);
+    my $new-dockerfile = q:heredoc/END/;
+        FROM nginx:latest
+        RUN apt-get update
+        RUN apt-get -y install openssh-server
+        END
+    spurt "$project-dir/docker/Dockerfile", $new-dockerfile;
+    my $new-projectyml = q:heredoc/END/;
+        command: /bin/bash -c "/etc/init.d/ssh start && nginx -g 'daemon off;'"
+        volumes:
+            - html:/usr/share/nginx/html:ro
+        END
+    spurt "$project-dir/docker/project.yml", $new-projectyml;
+    $project-dir;
 }
 
 my $domain-amazon = 'amazon';
@@ -98,12 +116,71 @@ subtest "platform .. --environment=sahara.yml run", {
 }
 
 #
-# Start 3 projects under *.amazon domain with single command and override
+# Start 2 projects under *.amazon domain with single command and override
 # project's default settings
 #
 subtest "platform .. --environment=amazon.yml run", {
-    plan 1;
-    ok True, "TODO";
+    plan 5;
+
+    create-ssh-project('octopus');
+    create-ssh-project('blowfish');
+    
+    my $environment-yml = q:heredoc/END/;
+        project-octopus:
+            users:
+              octonaut:
+                system: true
+                home: /var/lib/octonaut
+                shell: /bin/bash
+            dirs:
+              /var/lib/octonaut/.ssh:
+                owner: octonaut
+                group: nogroup
+                mode: 0700
+            files:
+              /var/lib/octonaut/.ssh/id_rsa:
+                content: ssh/id_rsa
+                owner: octonaut
+                group: nogroup
+                mode: 0600
+        project-blowfish:
+            users:
+              kwazii:
+                shell: /bin/bash
+            dirs:
+              /home/kwazii/.ssh:
+                owner: kwazii
+                group: kwazii
+                mode: 0700
+            files:
+              /home/kwazii/.ssh/authorized_keys:
+                content: ssh/id_rsa.pub
+                owner: kwazii
+                group: kwazii
+                mode: 0600
+        END
+
+    spurt "$tmpdir/amazon.yml", $environment-yml;
+    
+    my $proc = run <bin/platform>, "--domain=amazon", "--environment=$tmpdir/amazon.yml", "--data-path=$tmpdir/.platform", <run>, :out;
+    my $out = $proc.out.slurp-rest;
+    ok $out ~~ / project\-octopus \s+ \[ \✔ \] /, "project-octopus run";
+    ok $out ~~ / project\-blowfish \s+ \[ \✔ \] /, "project-blowfish run";
+
+    sleep 1.5;
+
+    my %addr;
+    for <octopus blowfish> -> $project {
+        $proc = run <host>, "project-{$project}.amazon", <localhost>, :out;
+        $out = $proc.out.slurp-rest;
+        my $found = $out.lines[*-1] ~~ / address \s $<ip-address> = [ \d+\.\d+\.\d+\.\d+ ] $$ /;
+        %addr{$project} = $/.hash<ip-address>;
+        ok $found, "got project-$project.amazon ip-address " ~ ($found ?? $/.hash<ip-address> !! '');
+    }
+
+    $proc = run <docker exec -it project-octopus su octonaut --command>, "ssh -o \"StrictHostKeyChecking no\" kwazii\@{%addr<blowfish>} ls /", :out;
+    $out = $proc.out.slurp-rest;
+    is $out.lines.elems, 21, 'got proper response from ssh connection';
 }
 
 subtest "platform .. --environment=shara.yml stop|rm", {
@@ -116,6 +193,18 @@ subtest "platform .. --environment=shara.yml stop|rm", {
     $out = $proc.out.slurp-rest;
     ok $out ~~ / project\-scorpion \s+ \[ \✔ \] /, 'project-scorpion rm';
     ok $out ~~ / project\-ant \s+ \[ \✔ \] /, 'project-ant rm';
+}
+
+subtest "platform .. --environment=amazon.yml stop|rm", {
+    plan 4;
+    my $proc = run <bin/platform>, "--environment=$tmpdir/amazon.yml", "--data-path=$tmpdir/.platform", <stop>, :out;
+    my $out = $proc.out.slurp-rest;
+    ok $out ~~ / project\-octopus \s+ \[ \✔ \] /, 'project-octopus stop';
+    ok $out ~~ / project\-blowfish \s+ \[ \✔ \] /, 'project-blowfish stop';
+    $proc = run <bin/platform>, "--environment=$tmpdir/amazon.yml", "--data-path=$tmpdir/.platform", <rm>, :out;
+    $out = $proc.out.slurp-rest;
+    ok $out ~~ / project\-octopus \s+ \[ \✔ \] /, 'project-octopus rm';
+    ok $out ~~ / project\-blowfish \s+ \[ \✔ \] /, 'project-blowfish rm';
 }
 
 run <bin/platform destroy>;

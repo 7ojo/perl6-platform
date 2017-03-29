@@ -8,6 +8,8 @@ class Platform::Project {
     has Str $.project;
     has Str $.domain = 'local';
     has Str $.data-path is rw;
+    has Hash %.override;
+
     has %.defaults =
         command => '/bin/bash',
         volumes => []
@@ -17,6 +19,7 @@ class Platform::Project {
         my ($config, $projectyml-path);
         $projectyml-path = "$_/project.yml" if not $projectyml-path and "$_/project.yml".IO.e for self.project ~ "/docker", self.project;
         $config = $projectyml-path ?? load-yaml $projectyml-path.IO.slurp !! item(%.defaults);
+        for %.override.kv -> $key, $val { $config{$key} = $val }
 
         my $cont = self.load-cont(  
             domain      => self.domain,
