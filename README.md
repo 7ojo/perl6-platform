@@ -129,7 +129,7 @@ When you have tightly coupled projects you may want configure those "single" pro
 
 # Remarks
 
-* Use ```--domain=facelift``` option on commandline to have different TLD on DNS names so can group/differentiate your environments more easily
+* Use ```--domain=whateveryouwant``` option on commandline to have different TLD on DNS names so can group/differentiate your environments more easily
 
 # References
 
