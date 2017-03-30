@@ -29,7 +29,18 @@ Similar projects:
     $ platform --project=butterfly-project/ run|start|stop|rm
     $ platform destroy
 
-# Example setup
+# Installation and Setup
+
+    $ zef install Platform
+    $ platform create
+
+Now add 127.0.0.1 as your DNS server to use platform's DNS server e.g
+
+    $ vim /etc/resolv.conf
+
+Note: Project's DNS name is constructed from folder name and domain which defaults to ```.local``` and can be changed from command line ```<project-folder-name>.<tld>``` e.g. ```project-butterfly.local```
+
+# Example project setup
 
 Everything and more is seen in test files under t/ directory, but here is simple example how to get started. Currently only docker containers are supported, but nothing prevents adding different container systems (or virtual machines).
 
@@ -43,22 +54,26 @@ Everything and more is seen in test files under t/ directory, but here is simple
 
     project-butterfly/project.yml
 
-        command: nginx -g 'daemon off;'
-        volumes:
-            - html:/usr/share/nginx/html:ro
+    ```yaml
+    command: nginx -g 'daemon off;'
+    volumes:
+        - html:/usr/share/nginx/html:ro
+    ```
 
  3. Create ```index.html``` file to show off
 
     project-butterfly/html/index.html
 
-        <!DOCTYPE html>
-        <html>
-        <head><title>Project Butterfly 🦋 </title></head>
-        <body>
-        <h2>Welcome to Project Butterfly 🦋 </h2>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc in libero dui. Curabitur eget iaculis ex. Nam pellentesque euismod augue, quis porttitor massa facilisis sit amet. Nulla a diam tempus augue pharetra congue.</p>
-        </body>
-        </html>
+    ```html
+    <!DOCTYPE html>
+    <html>
+    <head><title>Project Butterfly 🦋 </title></head>
+    <body>
+    <h2>Welcome to Project Butterfly 🦋 </h2>
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc in libero dui. Curabitur eget iaculis ex. Nam pellentesque euismod augue, quis porttitor massa facilisis sit amet. Nulla a diam tempus augue pharetra congue.</p>
+    </body>
+    </html>
+    ```
 
  4. Start platform services. This is done only once, because these services are shared between containers
 
@@ -84,10 +99,20 @@ When you have tightly coupled projects you may want configure those "single" pro
 
  2. Create your environment file e.g ```my-environment.yml```
 
-    TODO: Be more precise here what you can do here
+    ```yaml
+    # First project. No changes to project configuration just start the project.
+    project-butterfly: true
 
-        project-butterfly: true
-        project-snail: true
+    # Second project. Make changes to project default configuration
+    project-snail:
+      files:
+        /var/www/app/config:
+          volume: true
+          readonly: true
+          content: |
+          <?php
+            $hello = "こんにちは!";
+    ```
 
  3. Start platform services if not yet started
 
@@ -96,6 +121,11 @@ When you have tightly coupled projects you may want configure those "single" pro
  4. Start your environment
 
     ```$ platform --environment=my-environment.yml run```
+
+ 5. Open projects in a browser
+
+    * [http://project-butterfly.local](http://project-snail.local)
+    * [http://project-snail.local](http://project-snail.local)
 
 # Remarks
 
