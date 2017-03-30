@@ -22,9 +22,7 @@ class Platform::Project {
         for %.override.kv -> $key, $val { $config{$key} = $val }
 
         my $cont = self.load-cont(  
-            domain      => self.domain,
-            config-data => $config,
-            data-path   => self.data-path
+            config-data => $config
             );
 
         $cont.build;
@@ -45,6 +43,8 @@ class Platform::Project {
         my $class = "Platform::Docker::Container";
         %values<name> = self.project.IO.basename;
         %values<projectdir> = self.project;
+        %values<data-path> = self.data-path;
+        %values<domain> = self.domain;
         require ::($class);
         ::($class).new(|%values);
     }

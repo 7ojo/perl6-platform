@@ -6,6 +6,10 @@ With this tool you can configure container with single yaml file and you get con
 
 Of course everyhing what this tool does can be done using basic shell commands and wizardry, but in the long run it will be cumbersome when handling multiple projects and more if there are some how related to each other.
 
+Similar projects:
+
+* [Nut: the development environment, containerized](https://github.com/matthieudelaro/nut)
+
 # Features
 
 * Auto configuring DNS server [1]

@@ -26,7 +26,10 @@ sub create-project(Str $animal) {
         name => "project-" ~ $animal.lc
     ;
     mkdir "$project-dir/docker";
-    spurt "$project-dir/docker/Dockerfile", docker-dockerfile(%project);
+    my $dockerfile = q:heredoc/END/;
+        FROM nginx:latest
+        END
+    spurt "$project-dir/docker/Dockerfile", $dockerfile;
     my $project-yml = q:heredoc/END/;
         # command: nginx -g 'daemon off;'
         # volumes:
@@ -48,15 +51,15 @@ sub create-project(Str $animal) {
         dirs:
           /var/lib/auth/platorc/.ssh:
             owner: platorc
-            group: nobody
+            group: nogroup
             mode: 0700
         files:
           /etc/sudoers.d/app-installer: |
             platorc ALL=(www-data:www-data) NOPASSWD: /var/www/app/bin/installer
           /var/lib/auth/platorc/.ssh/authorized_keys:
-            content: id_rsa.pub
+            content: ssh/id_rsa.pub
             owner: platorc
-            group: nobody
+            group: nogroup
             mode: 0600
           # <target>: <content>
           /var/www/app/config:
@@ -80,6 +83,8 @@ sub create-project(Str $animal) {
     mkdir "$project-dir/html";
     spurt "$project-dir/html/index.html", html-welcome(%project);
     spurt "$project-dir/config", '<?php $hello = "Hello world!"';
+    my $proc = run <git init>, $project-dir, :out;
+    my $out = $proc.out.slurp-rest;
 }
 
 create-project('honeybee');
@@ -100,7 +105,7 @@ subtest 'platform ssh keygen', {
 }
 
 subtest 'platform run', {
-    plan 2;
+    plan 8;
     my $proc = run <bin/platform>, "--project=$tmpdir/project-honeybee", "--data-path=$tmpdir/.platform", <run>, :out;
     ok $proc.out.slurp-rest.Str ~~ / honeybee \s+ \[ \✔ \] /, 'project honeybee is up';
 
@@ -110,6 +115,44 @@ subtest 'platform run', {
     my $out = $proc.out.slurp-rest;
     my $found = $out.lines[*-1] ~~ / address \s $<ip-address> = [ \d+\.\d+\.\d+\.\d+ ] $$ /;
     ok $found, 'got ip-address ' ~ ($found ?? $/.hash<ip-address> !! '');
+
+    $proc = run <docker exec -it project-honeybee cat /var/lib/auth/platorc/.ssh/authorized_keys>, :out;
+    my $id_rsa_pub = "$tmpdir/.platform/local/ssh/id_rsa.pub".IO.slurp;
+    is $proc.out.slurp-rest.Str.trim, $id_rsa_pub.Str.trim, 'id_rsa.pub contents';
+    
+    $proc = run <docker exec -it project-honeybee cat /etc/sudoers.d/app-installer>, :out;
+    my Str $content = 'platorc ALL=(www-data:www-data) NOPASSWD: /var/www/app/bin/installer';
+    is $proc.out.slurp-rest.Str.trim, $content.trim, 'file /etc/sudoers.d/app-installer';
+
+    $proc = run <docker exec -it project-honeybee cat /var/www/app/config>, :out;
+    $content = q:heredoc/END/;
+        <?php
+        $hello = "こんにちは!";
+        END
+    is $proc.out.slurp-rest.Str.trim, $content.trim, 'file /var/www/app/config';
+    
+    $proc = run <docker exec -it project-honeybee cat /etc/install.ini>, :out;
+    $content = q:heredoc/END/;
+        foo
+        bar
+        kaa
+        END
+    is $proc.out.slurp-rest.Str.trim, $content.trim, 'file /etc/install.ini';
+    
+    $proc = run <docker exec -it project-honeybee cat /etc/foo/bar/config.ini>, :out;
+    $content = q:heredoc/END/;
+        [default]
+        host = project-honeybee.local
+        
+        [ui.project-honeybee.local]
+        path = /var/www/app/ui
+        END
+    is $proc.out.slurp-rest.Str.trim, $content.trim, 'file /etc/install.ini';
+
+    $proc = run <docker exec -it project-honeybee bash -c set>, :out;
+    my %vars;
+    $proc.out.lines.map({ my ($key, $val) = .split('='); %vars{$key} = $val });
+    is %vars{'GIT_BRANCH'}, 'HEAD', 'env variable GIT_BRANCH=HEAD is set';
 }
 
 

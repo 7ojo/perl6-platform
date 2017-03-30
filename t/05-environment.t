@@ -120,7 +120,7 @@ subtest "platform .. --environment=sahara.yml run", {
 # project's default settings
 #
 subtest "platform .. --environment=amazon.yml run", {
-    plan 5;
+    plan 6;
 
     create-ssh-project('octopus');
     create-ssh-project('blowfish');
@@ -181,6 +181,10 @@ subtest "platform .. --environment=amazon.yml run", {
     $proc = run <docker exec -it project-octopus su octonaut --command>, "ssh -o \"StrictHostKeyChecking no\" kwazii\@{%addr<blowfish>} ls /", :out;
     $out = $proc.out.slurp-rest;
     is $out.lines.elems, 21, 'got proper response from ssh connection';
+
+    $proc = run <docker exec -it project-octopus getent hosts project-blowfish.amazon>, :out;
+    $out = $proc.out.slurp-rest;
+    is $out.trim, %addr<blowfish> ~ '      project-blowfish.amazon', 'got project-blowfish.amazon ip inside container';
 }
 
 subtest "platform .. --environment=shara.yml stop|rm", {

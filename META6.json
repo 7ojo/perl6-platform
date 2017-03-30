@@ -16,7 +16,8 @@
     },
     "depends"       : [
         "Text::Wrap",
-        "YAMLish"
+        "YAMLish",
+        "JSON::Tiny"
     ],
     "source-url"    : "https://github.com/7ojo/perl6-platform.git"
 }

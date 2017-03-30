@@ -153,6 +153,9 @@ class Platform::Docker::Container is Platform::Container {
             @env = (@env, map { $_ = '--env ' ~ $_.subst(/ \$\(GIT_BRANCH\) /, $branch) }, $config<environment>.Array).flat;
         }
 
+        # DNS
+        @.extra-args.push("--dns {$.dns.Str}") if $.dns.Str.chars > 0;
+
         # PHASE: run
         my @args = flat @env, @.volumes, @.extra-args;
         my $cmd = "docker run -dit -h {self.hostname} --name {self.name} {@args.join(' ')} {self.name} {$config<command>}";

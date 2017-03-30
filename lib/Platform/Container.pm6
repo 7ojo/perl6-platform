@@ -6,10 +6,19 @@ class Platform::Container {
     has Str $.name is rw;
     has Str $.hostname is rw;
     has Str $.domain = 'local';
+    has Str $.dns;
     has Str $.data-path is rw;
     has Str $.projectdir;
     has Hash $.config-data;
     has %.last-result;
+    
+    submethod TWEAK {
+        my $resolv-conf = $!data-path ~ '/resolv.conf';
+        if $resolv-conf.IO.e {
+            my $found = $resolv-conf.IO.slurp ~~ / nameserver \s+ $<ip-address> = [ \d+\.\d+\.\d+\.\d+ ] /;
+            $!dns = $found ?? $/.hash<ip-address>.Str !! '';
+        }
+    }
 
     method result-as-hash($proc) {
         my $out = $proc.out.slurp-rest;

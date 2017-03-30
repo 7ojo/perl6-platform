@@ -40,11 +40,33 @@ sub create-project(Str $animal) {
 create-project('butterfly');
 
 subtest 'platform create', {
-    plan 2;
+    plan 6;
     my $proc = run <bin/platform>, "--data-path=$tmpdir/.platform", <create>, :out;
     my $out = $proc.out.slurp-rest;
     ok $out ~~ / DNS \s+ \[ \✔ \] /, 'service dns is up';
     ok $out ~~ / Proxy \s+ \[ \✔ \] /, 'service proxy is up';
+    
+    sleep 0.5;
+
+    $proc = run <host dns.local localhost>, :out;
+    $out = $proc.out.slurp-rest;
+    my %addr;
+    my $found = $out.lines[*-1] ~~ / address \s $<ip-address> = [ \d+\.\d+\.\d+\.\d+ ] $$ /;
+    ok $found, 'got dns.local ip-address ' ~ ($found ?? $/.hash<ip-address> !! '');
+    %addr<dns> = $/.hash<ip-address>;
+    
+    $proc = run <host proxy.local localhost>, :out;
+    $out = $proc.out.slurp-rest;
+    $found = $out.lines[*-1] ~~ / address \s $<ip-address> = [ \d+\.\d+\.\d+\.\d+ ] $$ /;
+    ok $found, 'got proxy.local ip-address ' ~ ($found ?? $/.hash<ip-address> !! '');
+    %addr<proxy> = $/.hash<ip-address>;
+
+    ok "$tmpdir/.platform/resolv.conf".IO.e, '<data-path>/resolv.conf exists';
+
+    $proc = run <docker exec -it platform-proxy getent hosts dns.local>, :out;
+    $out = $proc.out.slurp-rest;
+    is $out.trim, %addr<dns> ~ '      dns.local', 'got dns ip inside proxy container';
+
 }
 
 subtest 'platform ssl genrsa', {
@@ -72,8 +94,8 @@ subtest 'platform run|stop|start|rm project-butterfly', {
     my $proc = run <bin/platform>, "--project=$tmpdir/project-butterfly", "--data-path=$tmpdir/.platform", <run>, :out;
     ok $proc.out.slurp-rest.Str ~~ / butterfly \s+ \[ \✔ \] /, 'project butterfly is up';
 
-    sleep 1.5; # wait project to start
-
+    sleep 0.5; # wait project to start
+    
     $proc = run <host project-butterfly.local localhost>, :out;
     my $out = $proc.out.slurp-rest;
     my $found = $out.lines[*-1] ~~ / address \s $<ip-address> = [ \d+\.\d+\.\d+\.\d+ ] $$ /;
