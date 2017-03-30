@@ -14,6 +14,7 @@ class Platform::Container {
     
     submethod TWEAK {
         my $resolv-conf = $!data-path ~ '/resolv.conf';
+        $resolv-conf .= subst(/\~/, $*HOME);
         if $resolv-conf.IO.e {
             my $found = $resolv-conf.IO.slurp ~~ / nameserver \s+ $<ip-address> = [ \d+\.\d+\.\d+\.\d+ ] /;
             $!dns = $found ?? $/.hash<ip-address>.Str !! '';
