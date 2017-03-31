@@ -11,7 +11,7 @@ class Platform::Container {
     has Str $.projectdir;
     has Hash $.config-data;
     has %.last-result;
-    
+
     submethod TWEAK {
         my $resolv-conf = $!data-path ~ '/resolv.conf';
         $resolv-conf .= subst(/\~/, $*HOME);
@@ -40,7 +40,7 @@ class Platform::Container {
         my @lines;
         @lines.push: sprintf("├─ Container: %-8s     [%s]",
             $.name,
-            %.last-result<err>.chars == 0 ?? "\c[heavy check mark]" !! "\c[heavy multiplication x]"
+            %.last-result<err>.chars == 0 ?? "\c[CHECK MARK]" !! "\c[HEAVY MULTIPLICATION X]"
             );
         @lines.push: "│  └─ " ~ join("\n│     ", wrap-text(%.last-result<err>).lines) if %.last-result<err>.chars > 0;
         @lines.join("\n");
