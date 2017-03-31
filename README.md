@@ -1,4 +1,5 @@
 # Platform Project Development
+[![Build Status](https://travis-ci.org/7ojo/perl6-platform.svg?branch=master)](https://travis-ci.org/7ojo/perl6-platform)
 
 Platform command is a development tool for managing and running single projects or tightly coupled projects via container environment. In a long run aims to be kind of swiss army knife for configuring different like development environments.
 
