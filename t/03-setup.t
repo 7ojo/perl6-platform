@@ -13,7 +13,7 @@ if not AUTHOR {
      exit;
 }
 
-my $tmpdir = $*TMPDIR ~ '/test-platform-03-setup';
+my $tmpdir = '.tmp/test-platform-03-setup'.IO.abspath;
 run <rm -rf>, $tmpdir if $tmpdir.IO.e;
 mkdir $tmpdir;
 
@@ -43,30 +43,30 @@ subtest 'platform create', {
     plan 6;
     my $proc = run <bin/platform>, "--data-path=$tmpdir/.platform", <create>, :out;
     my $out = $proc.out.slurp-rest;
-    ok $out ~~ / DNS \s+ \[ \✔ \] /, 'service dns is up';
-    ok $out ~~ / Proxy \s+ \[ \✔ \] /, 'service proxy is up';
-    
+
+    ok $out ~~ / DNS \s+ \[ \✓ \] /, 'service dns is up';
+    ok $out ~~ / Proxy \s+ \[ \✓ \] /, 'service proxy is up';
+
     sleep 0.5;
 
-    $proc = run <host dns.local localhost>, :out;
+    $proc = run <host dns.localhost localhost>, :out;
     $out = $proc.out.slurp-rest;
     my %addr;
     my $found = $out.lines[*-1] ~~ / address \s $<ip-address> = [ \d+\.\d+\.\d+\.\d+ ] $$ /;
-    ok $found, 'got dns.local ip-address ' ~ ($found ?? $/.hash<ip-address> !! '');
+    ok $found, 'got dns.localhost ip-address ' ~ ($found ?? $/.hash<ip-address> !! '');
     %addr<dns> = $/.hash<ip-address>;
-    
-    $proc = run <host proxy.local localhost>, :out;
+
+    $proc = run <host proxy.localhost localhost>, :out;
     $out = $proc.out.slurp-rest;
     $found = $out.lines[*-1] ~~ / address \s $<ip-address> = [ \d+\.\d+\.\d+\.\d+ ] $$ /;
-    ok $found, 'got proxy.local ip-address ' ~ ($found ?? $/.hash<ip-address> !! '');
+    ok $found, 'got proxy.localhost ip-address ' ~ ($found ?? $/.hash<ip-address> !! '');
     %addr<proxy> = $/.hash<ip-address>;
 
     ok "$tmpdir/.platform/resolv.conf".IO.e, '<data-path>/resolv.conf exists';
 
-    $proc = run <docker exec -it platform-proxy getent hosts dns.local>, :out;
+    $proc = run <docker exec -it platform-proxy getent hosts dns.localhost>, :out;
     $out = $proc.out.slurp-rest;
-    is $out.trim, %addr<dns> ~ '      dns.local', 'got dns ip inside proxy container';
-
+    ok $out.trim ~~ / \d+\.\d+\.\d+\.\d+ \s+ dns.localhost /, 'got ip from dns inside container';
 }
 
 subtest 'platform ssl genrsa', {
@@ -75,28 +75,28 @@ subtest 'platform ssl genrsa', {
     my $out = $proc.out.slurp-rest;
     my $err = $proc.err.slurp-rest;
 
-    ok "$tmpdir/.platform/local".IO.e, '<data>/local exists';
-    ok "$tmpdir/.platform/local/ssl".IO.e, '<data>/local/ssl exists';
+    ok "$tmpdir/.platform/localhost".IO.e, '<data>/localhost exists';
+    ok "$tmpdir/.platform/localhost/ssl".IO.e, '<data>/localhost/ssl exists';
     for <server-key.key server-key.crt> -> $file {
-        ok "$tmpdir/.platform/local/ssl/$file".IO.e, "<data>/local/ssl/$file exists";
+        ok "$tmpdir/.platform/localhost/ssl/$file".IO.e, "<data>/localhost/ssl/$file exists";
     }
 }
 
 subtest 'platform ssh keygen', {
     plan 3;
     run <bin/platform>, "--data-path=$tmpdir/.platform", <ssh keygen>;
-    ok "$tmpdir/.platform/local/ssh".IO.e, '<data>/local/ssh exists';
-    ok "$tmpdir/.platform/local/ssh/$_".IO.e, "<data>/local/ssh/$_ exists" for <id_rsa id_rsa.pub>;
+    ok "$tmpdir/.platform/localhost/ssh".IO.e, '<data>/localhost/ssh exists';
+    ok "$tmpdir/.platform/localhost/ssh/$_".IO.e, "<data>/localhost/ssh/$_ exists" for <id_rsa id_rsa.pub>;
 }
 
 subtest 'platform run|stop|start|rm project-butterfly', {
     plan 4;
     my $proc = run <bin/platform>, "--project=$tmpdir/project-butterfly", "--data-path=$tmpdir/.platform", <run>, :out;
-    ok $proc.out.slurp-rest.Str ~~ / butterfly \s+ \[ \✔ \] /, 'project butterfly is up';
+    ok $proc.out.slurp-rest.Str ~~ / butterfly \s+ \[ \✓ \] /, 'project butterfly is up';
 
     sleep 0.5; # wait project to start
-    
-    $proc = run <host project-butterfly.local localhost>, :out;
+
+    $proc = run <host project-butterfly.localhost localhost>, :out;
     my $out = $proc.out.slurp-rest;
     my $found = $out.lines[*-1] ~~ / address \s $<ip-address> = [ \d+\.\d+\.\d+\.\d+ ] $$ /;
     ok $found, 'got ip-address ' ~ ($found ?? $/.hash<ip-address> !! '');
@@ -104,7 +104,8 @@ subtest 'platform run|stop|start|rm project-butterfly', {
     run <bin/platform>, "--project=$tmpdir/project-butterfly", "--data-path=$tmpdir/.platform", <stop>;
 
     $proc = run <bin/platform>, "--project=$tmpdir/project-butterfly", "--data-path=$tmpdir/.platform", <start>, :out;
-    ok $proc.out.slurp-rest ~~ / butterfly \s+ \[ \✔ \] /, 'project butterfly is up';
+    $out = $proc.out.slurp-rest;
+    ok $out ~~ / butterfly \s+ \[ \✓ \] /, 'project butterfly is up';
 
     run <bin/platform>, "--project=$tmpdir/project-butterfly", "--data-path=$tmpdir/.platform", <stop>;
 
@@ -120,13 +121,13 @@ subtest 'platform run butterfly|snail', {
     plan 4;
     for <butterfly snail> -> $project {
         my $proc = run <bin/platform>, "--project=$tmpdir/project-$project", "--data-path=$tmpdir/.platform", <run>, :out;
-        ok $proc.out.slurp-rest.Str ~~ / $project \s+ \[ \✔ \] /, "project $project is up";
+        ok $proc.out.slurp-rest.Str ~~ / $project \s+ \[ \✓ \] /, "project $project is up";
     }
 
     sleep 1.5; # wait projects to start
 
     for <butterfly snail> -> $project {
-        my $proc = run <host>, 'project-' ~ $project ~ '.local', <localhost>, :out;
+        my $proc = run <host>, 'project-' ~ $project ~ '.localhost', <localhost>, :out;
         my $out = $proc.out.slurp-rest;
         my $found = $out.lines[*-1] ~~ / address \s $<ip-address> = [ \d+\.\d+\.\d+\.\d+ ] $$ /;
         ok $found, 'got ip-address ' ~ ($found ?? $/.hash<ip-address> !! '') ~ " for $project";

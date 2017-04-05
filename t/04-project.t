@@ -13,7 +13,7 @@ if not AUTHOR {
      exit;
 }
 
-my $tmpdir = $*TMPDIR ~ '/test-platform-04-project';
+my $tmpdir = '.tmp/test-platform-04-project'.IO.abspath;
 run <rm -rf>, $tmpdir if $tmpdir.IO.e;
 mkdir $tmpdir;
 
@@ -74,9 +74,9 @@ sub create-project(Str $animal) {
             kaa
           /etc/foo/bar/config.ini: |
             [default]
-            host = project-honeybee.local
+            host = project-honeybee.localhost
             
-            [ui.project-honeybee.local]
+            [ui.project-honeybee.localhost]
             path = /var/www/app/ui
         END
     spurt "$project-dir/docker/project.yml", $project-yml;
@@ -93,31 +93,32 @@ subtest 'platform create', {
     plan 2;
     my $proc = run <bin/platform>, "--data-path=$tmpdir/.platform", <create>, :out;
     my $out = $proc.out.slurp-rest;
-    ok $out ~~ / DNS \s+ \[ \✔ \] /, 'service dns is up';
-    ok $out ~~ / Proxy \s+ \[ \✔ \] /, 'service proxy is up';
+    ok $out ~~ / DNS \s+ \[ \✓ \] /, 'service dns is up';
+    ok $out ~~ / Proxy \s+ \[ \✓ \] /, 'service proxy is up';
 }
 
 subtest 'platform ssh keygen', {
     plan 3;
     run <bin/platform>, "--data-path=$tmpdir/.platform", <ssh keygen>;
-    ok "$tmpdir/.platform/local/ssh".IO.e, '<data>/local/ssh exists';
-    ok "$tmpdir/.platform/local/ssh/$_".IO.e, "<data>/local/ssh/$_ exists" for <id_rsa id_rsa.pub>;
+    ok "$tmpdir/.platform/localhost/ssh".IO.e, '<data>/localhost/ssh exists';
+    ok "$tmpdir/.platform/localhost/ssh/$_".IO.e, "<data>/localhost/ssh/$_ exists" for <id_rsa id_rsa.pub>;
 }
 
 subtest 'platform run', {
     plan 8;
     my $proc = run <bin/platform>, "--project=$tmpdir/project-honeybee", "--data-path=$tmpdir/.platform", <run>, :out;
-    ok $proc.out.slurp-rest.Str ~~ / honeybee \s+ \[ \✔ \] /, 'project honeybee is up';
+    my $out = $proc.out.slurp-rest.Str;
+    ok $out ~~ / honeybee \s+ \[ \✓ \] /, 'project honeybee is up';
 
     sleep 1.5; # wait project to start
 
-    $proc = run <host project-honeybee.local localhost>, :out;
-    my $out = $proc.out.slurp-rest;
+    $proc = run <host project-honeybee.localhost localhost>, :out;
+    $out = $proc.out.slurp-rest;
     my $found = $out.lines[*-1] ~~ / address \s $<ip-address> = [ \d+\.\d+\.\d+\.\d+ ] $$ /;
     ok $found, 'got ip-address ' ~ ($found ?? $/.hash<ip-address> !! '');
 
     $proc = run <docker exec -it project-honeybee cat /var/lib/auth/platorc/.ssh/authorized_keys>, :out;
-    my $id_rsa_pub = "$tmpdir/.platform/local/ssh/id_rsa.pub".IO.slurp;
+    my $id_rsa_pub = "$tmpdir/.platform/localhost/ssh/id_rsa.pub".IO.slurp;
     is $proc.out.slurp-rest.Str.trim, $id_rsa_pub.Str.trim, 'id_rsa.pub contents';
     
     $proc = run <docker exec -it project-honeybee cat /etc/sudoers.d/app-installer>, :out;
@@ -142,9 +143,9 @@ subtest 'platform run', {
     $proc = run <docker exec -it project-honeybee cat /etc/foo/bar/config.ini>, :out;
     $content = q:heredoc/END/;
         [default]
-        host = project-honeybee.local
+        host = project-honeybee.localhost
         
-        [ui.project-honeybee.local]
+        [ui.project-honeybee.localhost]
         path = /var/www/app/ui
         END
     is $proc.out.slurp-rest.Str.trim, $content.trim, 'file /etc/install.ini';

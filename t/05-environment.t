@@ -13,7 +13,7 @@ if not AUTHOR {
      exit;
 }
 
-my $tmpdir = $*TMPDIR ~ '/test-platform-05-environment';
+my $tmpdir = '.tmp/test-platform-05-environment'.IO.abspath;
 run <rm -rf>, $tmpdir if $tmpdir.IO.e;
 mkdir $tmpdir;
 
@@ -65,8 +65,8 @@ subtest 'platform create', {
     plan 2;
     my $proc = run <bin/platform>, "--data-path=$tmpdir/.platform", <create>, :out;
     my $out = $proc.out.slurp-rest;
-    ok $out ~~ / DNS \s+ \[ \✔ \] /, 'service dns is up';
-    ok $out ~~ / Proxy \s+ \[ \✔ \] /, 'service proxy is up';
+    ok $out ~~ / DNS \s+ \[ \✓ \] /, 'service dns is up';
+    ok $out ~~ / Proxy \s+ \[ \✓ \] /, 'service proxy is up';
 }
 
 subtest "platform --domain=$domain-sahara ssh keygen", {
@@ -102,8 +102,8 @@ subtest "platform .. --environment=sahara.yml run", {
 
     my $proc = run <bin/platform>, "--domain=sahara", "--environment=$tmpdir/sahara.yml", "--data-path=$tmpdir/.platform", <run>, :out;
     my $out = $proc.out.slurp-rest;
-    ok $out ~~ / project\-scorpion \s+ \[ \✔ \] /, "project-scorpion run";
-    ok $out ~~ / project\-ant \s+ \[ \✔ \] /, "project-ant run";
+    ok $out ~~ / project\-scorpion \s+ \[ \✓ \] /, "project-scorpion run";
+    ok $out ~~ / project\-ant \s+ \[ \✓ \] /, "project-ant run";
 
     sleep 1.5;
 
@@ -164,8 +164,8 @@ subtest "platform .. --environment=amazon.yml run", {
     
     my $proc = run <bin/platform>, "--domain=amazon", "--environment=$tmpdir/amazon.yml", "--data-path=$tmpdir/.platform", <run>, :out;
     my $out = $proc.out.slurp-rest;
-    ok $out ~~ / project\-octopus \s+ \[ \✔ \] /, "project-octopus run";
-    ok $out ~~ / project\-blowfish \s+ \[ \✔ \] /, "project-blowfish run";
+    ok $out ~~ / project\-octopus \s+ \[ \✓ \] /, "project-octopus run";
+    ok $out ~~ / project\-blowfish \s+ \[ \✓ \] /, "project-blowfish run";
 
     sleep 1.5;
 
@@ -191,24 +191,24 @@ subtest "platform .. --environment=shara.yml stop|rm", {
     plan 4;
     my $proc = run <bin/platform>, "--environment=$tmpdir/sahara.yml", "--data-path=$tmpdir/.platform", <stop>, :out;
     my $out = $proc.out.slurp-rest;
-    ok $out ~~ / project\-scorpion \s+ \[ \✔ \] /, 'project-scorpion stop';
-    ok $out ~~ / project\-ant \s+ \[ \✔ \] /, 'project-ant stop';
+    ok $out ~~ / project\-scorpion \s+ \[ \✓ \] /, 'project-scorpion stop';
+    ok $out ~~ / project\-ant \s+ \[ \✓ \] /, 'project-ant stop';
     $proc = run <bin/platform>, "--environment=$tmpdir/sahara.yml", "--data-path=$tmpdir/.platform", <rm>, :out;
     $out = $proc.out.slurp-rest;
-    ok $out ~~ / project\-scorpion \s+ \[ \✔ \] /, 'project-scorpion rm';
-    ok $out ~~ / project\-ant \s+ \[ \✔ \] /, 'project-ant rm';
+    ok $out ~~ / project\-scorpion \s+ \[ \✓ \] /, 'project-scorpion rm';
+    ok $out ~~ / project\-ant \s+ \[ \✓ \] /, 'project-ant rm';
 }
 
 subtest "platform .. --environment=amazon.yml stop|rm", {
     plan 4;
     my $proc = run <bin/platform>, "--environment=$tmpdir/amazon.yml", "--data-path=$tmpdir/.platform", <stop>, :out;
     my $out = $proc.out.slurp-rest;
-    ok $out ~~ / project\-octopus \s+ \[ \✔ \] /, 'project-octopus stop';
-    ok $out ~~ / project\-blowfish \s+ \[ \✔ \] /, 'project-blowfish stop';
+    ok $out ~~ / project\-octopus \s+ \[ \✓ \] /, 'project-octopus stop';
+    ok $out ~~ / project\-blowfish \s+ \[ \✓ \] /, 'project-blowfish stop';
     $proc = run <bin/platform>, "--environment=$tmpdir/amazon.yml", "--data-path=$tmpdir/.platform", <rm>, :out;
     $out = $proc.out.slurp-rest;
-    ok $out ~~ / project\-octopus \s+ \[ \✔ \] /, 'project-octopus rm';
-    ok $out ~~ / project\-blowfish \s+ \[ \✔ \] /, 'project-blowfish rm';
+    ok $out ~~ / project\-octopus \s+ \[ \✓ \] /, 'project-octopus rm';
+    ok $out ~~ / project\-blowfish \s+ \[ \✓ \] /, 'project-blowfish rm';
 }
 
 run <bin/platform destroy>;
