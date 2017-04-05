@@ -4,12 +4,12 @@ use YAMLish;
 
 class Platform::Environment {
 
-    has Str $.domain = 'local';
+    has Str $.domain = 'localhost';
     has Str $.data-path is rw;
     has Str $.environment;
     has Platform::Project @.projects;
     has Platform::Container @.containers;
-   
+
     submethod TWEAK {
         my $config = load-yaml $!environment.IO.slurp;
         for $config.Hash.kv -> $project, $data {
@@ -26,7 +26,7 @@ class Platform::Environment {
             }
         }
     }
- 
+
     method run { @.projects.map: { @.containers.push(.run) }; self }
 
     method start { @.projects.map: { @.containers.push(.start) }; self }

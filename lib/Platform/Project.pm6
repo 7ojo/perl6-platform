@@ -6,7 +6,7 @@ class Platform::Project {
 
     has Str $.config;
     has Str $.project;
-    has Str $.domain = 'local';
+    has Str $.domain = 'localhost';
     has Str $.data-path is rw;
     has Hash %.override;
 
@@ -21,7 +21,7 @@ class Platform::Project {
         $config = $projectyml-path ?? load-yaml $projectyml-path.IO.slurp !! item(%.defaults);
         for %.override.kv -> $key, $val { $config{$key} = $val }
 
-        my $cont = self.load-cont(  
+        my $cont = self.load-cont(
             config-data => $config
             );
 

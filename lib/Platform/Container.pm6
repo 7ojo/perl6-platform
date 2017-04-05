@@ -5,7 +5,7 @@ class Platform::Container {
 
     has Str $.name is rw;
     has Str $.hostname is rw;
-    has Str $.domain = 'local';
+    has Str $.domain = 'localhost';
     has Str $.dns;
     has Str $.data-path is rw;
     has Str $.projectdir;

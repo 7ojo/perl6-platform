@@ -19,64 +19,64 @@ multi sub load-module(:$name, :$domain, :$data-path, :$environment) {
 }
 
 #| Start shared platform services
-multi sub MAIN('create', Str :$domain = 'local', Str :$data-path = '~/.platform') {
+multi sub MAIN('create', Str :$domain = 'localhost', Str :$data-path = '~/.platform') {
     put "Platform";
     put $_.as-string for load-module(:name<Platform>, :$domain, :$data-path).create.Array;
 }
 
 #| Shutdown shared platform services
-multi sub MAIN('destroy', Str :$domain = 'local', Str :$data-path = '~/.platform') {
+multi sub MAIN('destroy', Str :$domain = 'localhost', Str :$data-path = '~/.platform') {
     load-module(:name<Platform>, :$domain, :$data-path).destroy;
 }
 
 #| Initialize and run single project
-multi sub MAIN('run', Str :$project, Str :$domain = 'local', Str :$data-path = '~/.platform') {
+multi sub MAIN('run', Str :$project, Str :$domain = 'localhost', Str :$data-path = '~/.platform') {
     put "Platform\n" ~ load-module(:name<Platform::Project>, :$domain, :$data-path, :$project).run.as-string;
 }
 
 #| Start suspended project
-multi sub MAIN('start', Str :$project, Str :$domain = 'local', Str :$data-path = '~/.platform') {
+multi sub MAIN('start', Str :$project, Str :$domain = 'localhost', Str :$data-path = '~/.platform') {
     put "Platform\n" ~ load-module(:name<Platform::Project>, :$domain, :$data-path, :$project).start.as-string;
 }
 
 #| Stop running project 
-multi sub MAIN('stop', Str :$project, Str :$domain = 'local', Str :$data-path = '~/.platform') {
+multi sub MAIN('stop', Str :$project, Str :$domain = 'localhost', Str :$data-path = '~/.platform') {
     load-module(:name<Platform::Project>, :$domain, :$data-path, :$project).stop;
 }
 
 #| Remove stopped project
-multi sub MAIN('rm', Str :$project, Str :$domain = 'local', Str :$data-path = '~/.platform') {
+multi sub MAIN('rm', Str :$project, Str :$domain = 'localhost', Str :$data-path = '~/.platform') {
     my $obj = load-module(:name<Platform::Project>, :$domain, :$data-path, :$project).rm;
     put "Platform\n" ~ $obj.as-string if $obj.last-result<err>.chars > 0;
 }
 
 #| Initialize and run environment
-multi sub MAIN('run', Str :$environment, Str :$domain = 'local', Str :$data-path = '~/.platform') {
+multi sub MAIN('run', Str :$environment, Str :$domain = 'localhost', Str :$data-path = '~/.platform') {
     put "Platform\n" ~ load-module(:name<Platform::Environment>, :$domain, :$data-path, :$environment).run.as-string;
 }
 
 #| Start suspended environment
-multi sub MAIN('start', Str :$environment, Str :$domain = 'local', Str :$data-path = '~/.platform') {
+multi sub MAIN('start', Str :$environment, Str :$domain = 'localhost', Str :$data-path = '~/.platform') {
     put "Platform\n" ~ load-module(:name<Platform::Environment>, :$domain, :$data-path, :$environment).start.as-string;
 }
 
 #| Stop running environment
-multi sub MAIN('stop', Str :$environment, Str :$domain = 'local', Str :$data-path = '~/.platform') {
+multi sub MAIN('stop', Str :$environment, Str :$domain = 'localhost', Str :$data-path = '~/.platform') {
     put "Platform\n" ~ load-module(:name<Platform::Environment>, :$domain, :$data-path, :$environment).stop.as-string;
 }
 
 #| Remove stopped environment
-multi sub MAIN('rm', Str :$environment, Str :$domain = 'local', Str :$data-path = '~/.platform') {
+multi sub MAIN('rm', Str :$environment, Str :$domain = 'localhost', Str :$data-path = '~/.platform') {
     put "Platform\n" ~ load-module(:name<Platform::Environment>, :$domain, :$data-path, :$environment).rm.as-string;
 }
 
 #| Generation of RSA Private Key
-multi sub MAIN('ssl', 'genrsa', Str :$domain = 'local', Str :$data-path = '~/.platform') {
+multi sub MAIN('ssl', 'genrsa', Str :$domain = 'localhost', Str :$data-path = '~/.platform') {
     load-module(:name<Platform>, :$domain, :$data-path).ssl('genrsa');
 }
 
 #| Generation of authentication keys
-multi sub MAIN('ssh', 'keygen', Str :$domain = 'local', Str :$data-path = '~/.platform') {
+multi sub MAIN('ssh', 'keygen', Str :$domain = 'localhost', Str :$data-path = '~/.platform') {
     load-module(:name<Platform>, :$domain, :$data-path).ssh('keygen'); 
 }
 

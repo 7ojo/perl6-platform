@@ -15,7 +15,7 @@ class Platform::Docker::DNS is Platform::Container {
             <--dns>, '8.8.4.4',
             <--env>,
             "VIRTUAL_HOST={$.hostname}",
-            <--publish 53:53/udp --volume /var/run/docker.sock:/var/run/docker.sock:ro --label dns.tld=local --env>,
+            <--publish 53:53/udp --volume /var/run/docker.sock:/var/run/docker.sock:ro --label dns.tld=localhost --env>,
             "DOMAIN_TLD={self.domain}",
             <zetaron/docker-dns-gen>,
             :out, :err;
