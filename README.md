@@ -131,8 +131,8 @@ When you have tightly coupled projects you may want configure those "single" pro
 # Todo / Known issues
 
 * General: No feedback on e.g. build phase when it can take a long time on fetching things
-* MacOS: There is no bridge between host and containers. This can help https://github.com/mal/docker-for-mac-host-bridge
-* MacOS: If not bridging the networks you'll need local DNS server to point default ```*.localhost``` address to 127.0.0.1 (```brew install dnsmasq``` and so on)
+* macOS: There is no bridge between host and containers. This can help https://github.com/mal/docker-for-mac-host-bridge
+* macOS: If not bridging the networks you'll need local DNS server to point default ```*.localhost``` address to 127.0.0.1 (```brew install dnsmasq``` and so on)
 
 # Remarks
 
