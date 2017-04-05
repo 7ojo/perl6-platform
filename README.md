@@ -128,6 +128,11 @@ When you have tightly coupled projects you may want configure those "single" pro
     * [http://project-butterfly.local](http://project-snail.local)
     * [http://project-snail.local](http://project-snail.local)
 
+# Todo / Known issues
+
+* No feedback on e.g. build phase when it can take a long time on fetching things
+* On OSX there is no bridge between host and containers. This can help https://github.com/mal/docker-for-mac-host-bridge
+
 # Remarks
 
 * Use ```--domain=whateveryouwant``` option on commandline to have different TLD on DNS names so can group/differentiate your environments more easily
