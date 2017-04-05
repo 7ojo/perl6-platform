@@ -11,6 +11,8 @@ class Platform::Docker::DNS is Platform::Container {
         my $proc = run
             <docker run -d --rm --name>,
             'platform-' ~ self.name.lc,
+            <--dns>, '8.8.8.8',
+            <--dns>, '8.8.4.4',
             <--env>,
             "VIRTUAL_HOST={$.hostname}",
             <--publish 53:53/udp --volume /var/run/docker.sock:/var/run/docker.sock:ro --label dns.tld=local --env>,
