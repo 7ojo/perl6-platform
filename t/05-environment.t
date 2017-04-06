@@ -108,9 +108,9 @@ subtest "platform .. --environment=sahara.yml run", {
     sleep 1.5;
 
     for <scorpion ant> -> $project {
-        $proc = run <host>, "project-{$project}.sahara", <localhost>, :out;
+        $proc = run <docker exec -it platform-proxy getent hosts>, "project-{$project}.sahara", :out;
         $out = $proc.out.slurp-rest;
-        my $found = $out.lines[*-1] ~~ / address \s $<ip-address> = [ \d+\.\d+\.\d+\.\d+ ] $$ /;
+        my $found = $out.Str.trim ~~ / ^ $<ip-address> = [ \d+\.\d+\.\d+\.\d+ ] /;
         ok $found, "got project-$project.sahara ip-address " ~ ($found ?? $/.hash<ip-address> !! '');
     }
 }
@@ -171,11 +171,11 @@ subtest "platform .. --environment=amazon.yml run", {
 
     my %addr;
     for <octopus blowfish> -> $project {
-        $proc = run <host>, "project-{$project}.amazon", <localhost>, :out;
+        $proc = run <docker exec -it platform-proxy getent hosts>, "project-{$project}.amazon", :out;
         $out = $proc.out.slurp-rest;
-        my $found = $out.lines[*-1] ~~ / address \s $<ip-address> = [ \d+\.\d+\.\d+\.\d+ ] $$ /;
+        my $found = $out.Str.trim ~~ / ^ $<ip-address> = [ \d+\.\d+\.\d+\.\d+ ] /;
         %addr{$project} = $/.hash<ip-address>;
-        ok $found, "got project-$project.amazon ip-address " ~ ($found ?? $/.hash<ip-address> !! '');
+        ok $found, "got project-$project.amazon ip-address " ~ ($found ?? $/.hash<ip-address> !! '');    
     }
 
     $proc = run <docker exec -it project-octopus su octonaut --command>, "ssh -o \"StrictHostKeyChecking no\" kwazii\@{%addr<blowfish>} ls /", :out;

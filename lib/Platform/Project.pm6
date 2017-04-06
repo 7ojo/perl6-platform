@@ -6,6 +6,7 @@ class Platform::Project {
 
     has Str $.config;
     has Str $.project;
+    has Str $.network = 'acme';
     has Str $.domain = 'localhost';
     has Str $.data-path is rw;
     has Hash %.override;
@@ -44,6 +45,7 @@ class Platform::Project {
         %values<name> = self.project.IO.basename;
         %values<projectdir> = self.project;
         %values<data-path> = self.data-path;
+        %values<network> = self.network;
         %values<domain> = self.domain;
         require ::($class);
         ::($class).new(|%values);

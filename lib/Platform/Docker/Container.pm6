@@ -153,6 +153,9 @@ class Platform::Docker::Container is Platform::Container {
             @env = (@env, map { $_ = '--env ' ~ $_.subst(/ \$\(GIT_BRANCH\) /, $branch) }, $config<environment>.Array).flat;
         }
 
+        # Network
+        @.extra-args.push("--network {$.network.Str}") if $.network-exists;
+
         # DNS
         @.extra-args.push("--dns {$.dns.Str}") if $.dns.Str.chars > 0;
 

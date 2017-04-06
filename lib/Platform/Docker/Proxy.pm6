@@ -10,6 +10,7 @@ class Platform::Docker::Proxy is Platform::Container {
         my $proc = run
             <docker run -d --rm --name>,
             'platform-' ~ $.name.lc,
+            ([<--network>, $.network] if $.network-exists),
             <--dns>, $.dns,
             <--env>, "VIRTUAL_HOST={$.hostname}",
             <--publish 80:80 --volume /var/run/docker.sock:/tmp/docker.sock:ro>,

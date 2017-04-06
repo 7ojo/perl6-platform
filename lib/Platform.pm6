@@ -12,9 +12,9 @@ class Platform is Platform::Container {
         mkdir self.data-path if not self.data-path.IO.e;
     }
 
-    method create { @.services.map: { ::("Platform::Docker::$_").new(:$.domain, :$.data-path).start } }
+    method create { @.services.map: { ::("Platform::Docker::$_").new(:$.network, :$.domain, :$.data-path).start } }
 
-    method destroy { @.services.map: { ::("Platform::Docker::$_").new(:$.domain, :$.data-path).stop } }
+    method destroy { @.services.map: { ::("Platform::Docker::$_").new(:$.network, :$.domain, :$.data-path).stop } }
 
     method ssl('genrsa') {
         my $ssl-dir = $.data-path ~ '/' ~ self.domain ~'/ssl';

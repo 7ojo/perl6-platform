@@ -5,6 +5,8 @@ class Platform::Container {
 
     has Str $.name is rw;
     has Str $.hostname is rw;
+    has Str $.network = 'acme';
+    has Bool $.network-exists = False;
     has Str $.domain = 'localhost';
     has Str $.dns;
     has Str $.data-path is rw;
@@ -19,6 +21,9 @@ class Platform::Container {
             my $found = $resolv-conf.IO.slurp ~~ / nameserver \s+ $<ip-address> = [ \d+\.\d+\.\d+\.\d+ ] /;
             $!dns = $found ?? $/.hash<ip-address>.Str !! '';
         }
+        my $proc = run <docker network inspect>, $!network, :out, :err;
+        my $out = $proc.out.slurp-rest;
+        $!network-exists = $out.Str.trim ne '[]';
     }
 
     method result-as-hash($proc) {
