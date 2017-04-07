@@ -109,7 +109,7 @@ class Platform::Docker::Container is Platform::Container {
                     $content = "$path/$content".IO.slurp if "$path/$content".IO.e;
                     mkdir "$path/{self.name}/" ~ $target.IO.dirname;
                     spurt "$path/{self.name}/{$target}", $content;
-                    @.volumes.push: "--volume $path/{self.name}/{$target}:{$target}{$flags}";    
+                    @.volumes.push: "--volume $path/{self.name}/{$target}:{$target}{$flags}";
                     next;
                 } else {
                     $owner   = $content<owner> if $content<owner>;
@@ -171,7 +171,7 @@ class Platform::Docker::Container is Platform::Container {
     }
 
     method stop {
-        self.last-command: run <docker stop>, self.name, :out, :err;
+        self.last-command: run <docker stop -t 0>, self.name, :out, :err;
         self;
     }
     
