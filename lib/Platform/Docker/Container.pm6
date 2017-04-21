@@ -36,6 +36,7 @@ class Platform::Docker::Container is Platform::Container {
         my @cmds;
         my $config = self.config-data;
         for $config<users>.Hash.kv -> $login, $params {
+            put "+ $login";
             my %params = $params ~~ Hash ?? $params.hash !! ();
             if %params<home> {
                 @cmds.push: 'mkdir -p ' ~ %params<home>.IO.dirname;

@@ -47,9 +47,9 @@ class Platform::Project {
             ); 
 
         my @active = map {
-            next if ! ( $_.key eq any(<users dirs files>) and $_.value.elems > 0 );
-            $_.key;
-        }, $config.Hash;
+            next if ! ( $config{$_} and $config{$_}.elems > 0 );
+            $_;
+        }, <users dirs files>;
         @active.unshift('build');
         
         for @active {
