@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+### Added
+- ```platform --project=xxx attach``` to connect container via shell
+- examples/openldap to use openldap on your environments
+
+### Fixed
+- Usage of ~ on project folder
+- Misc output cleanups 
+
 ## [0.0.4]
 ### Added
 - Support for absolute path on project file e.g ```platform --project=<projectdir>/project.yml run```
