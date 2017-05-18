@@ -10,11 +10,23 @@ multi sub load-module(:$name, :$network = 'acme', :$domain = 'localhost', :$data
 }
 
 multi sub load-module(:$name, :$project, :$network = 'acme', :$domain = 'localhost', :$data-path) {
+    CATCH {
+        when X::IO {
+            say color('red') ~ "ERROR: " ~ $_.Str ~ color('reset');
+            exit;
+        }
+    }
     require ::($name);
     ::($name).new(:$project, :$network, :$domain, :$data-path);
 }
 
 multi sub load-module(:$name, :$environment, :$network = 'acme', :$domain = 'localhost', :$data-path) {
+    CATCH {
+        when X::IO {
+            say color('red') ~ "ERROR: " ~ $_.Str ~ color('reset');
+            exit;
+        }
+    }
     require ::($name);
     ::($name).new(:$domain, :$data-path, :$environment);
 }
@@ -103,3 +115,4 @@ multi sub MAIN('ssh', 'keygen', Str :$domain = 'localhost', Str :$data-path = '~
 sub banner returns Str {
     color('yellow') ~ '» Project' ~ color('reset') ~ "\n";
 }
+
