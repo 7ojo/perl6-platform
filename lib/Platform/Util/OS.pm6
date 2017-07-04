@@ -15,6 +15,10 @@ class Platform::Util::OS {
         given $v {
             when /:i ^ darwin / { return 'macos' }
             when /:i ^ linux / { return 'linux' }
+            when /:i ^ win / { return 'windows' }
+            default {
+              return 'unknown'
+            }
         }
     }
 
