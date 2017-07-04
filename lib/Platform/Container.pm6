@@ -22,12 +22,12 @@ class Platform::Container {
             $!dns = $found ?? $/.hash<ip-address>.Str !! '';
         }
         my $proc = run <docker network inspect>, $!network, :out, :err;
-        my $out = $proc.out.slurp-rest;
+        my $out = $proc.out.slurp-rest(:close);
         # $!network-exists = $out.Str.trim ne '[]';
     }
 
     method result-as-hash($proc) {
-        my $out = $proc.out.slurp-rest;
+        my $out = $proc.out.slurp-rest(:close);
         my $err = $proc.err.slurp-rest;
         my %result =
             ret => $err.chars == 0,

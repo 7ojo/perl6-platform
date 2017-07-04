@@ -10,12 +10,15 @@ class Platform::Util::OS {
         return $instance //= self.bless(|%named);
     }
 
-    submethod detect {
-        my Str $v = $instance.kernel ?? $instance.kernel !! $*KERNEL.name;
+    method detect {
+        my Str $v = self.new.kernel ?? self.new.kernel !! $*KERNEL.name;
         given $v {
             when /:i ^ darwin / { return 'macos' }
             when /:i ^ linux / { return 'linux' }
         }
     }
 
+    submethod clear {
+        $instance = Nil;
+    }
 }
