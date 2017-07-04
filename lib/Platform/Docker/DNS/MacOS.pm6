@@ -66,14 +66,19 @@ class Platform::Docker::DNS::MacOS does Platform::Docker::DNS {
         run <docker exec>, "platform-$name", <ash -c>, Q[sed -i 's/{{ $network.IP *}}/127.0.0.1/' /etc/dnsmasq.tmpl];
 
         # If all went fine then check the name if its working
-        say "exitcode: " ~ $proc.exitcode;
         if $proc.exitcode == 0 {
             my Proc $ping = run <ping -c 1 dns-in.localhost>, :out, :err;
-            say "cmd: " ~ $ping.command;
-            say "out: " ~ $ping.out.slurp-rest(:close);
-            say "err: " ~ $ping.err.slurp-rest;
-            say "ping: " ~ $ping.exitcode;
-            self.last-result = self.result-as-hash($ping) if $ping.exitcode != 0;
+            self.last-result = self.result-as-hash($ping);
+            self.help-hint = q:heredoc/END/;
+                dns is not configured properly. try this:
+                
+                    $ sudo sh -c 'echo "nameserver 127.0.0.1" > /etc/resolver/localhost'
+                
+                and try ping again to dns-in.localhost address like this:
+                
+                    $ ping dns-in.localhost
+                
+                END
         }
         
         self;

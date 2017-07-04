@@ -13,6 +13,7 @@ class Platform::Container {
     has Str $.projectdir;
     has Hash $.config-data;
     has %.last-result;
+    has Str $.help-hint is rw;
 
     submethod TWEAK {
         $!data-path .= subst(/\~/, $*HOME);
@@ -47,7 +48,11 @@ class Platform::Container {
             $.name,
             %.last-result<err>.chars == 0 ?? "\c[CHECK MARK]" !! "\c[HEAVY MULTIPLICATION X]"
             );
-        @lines.push: "  └─ " ~ join("\n│     ", wrap-text(%.last-result<err>).lines) if %.last-result<err>.chars > 0;
+        if %.last-result<err>.chars > 0 {
+            my $sep = $.help-hint.chars > 0 ?? '├' !! '└';
+            @lines.push: "  $sep─ " ~ join("\n│     ", wrap-text(%.last-result<err>).lines) ;
+            @lines.push: "  └─ hint: " ~ join("\n     ", wrap-text($.help-hint).lines) ;
+        }
         @lines.join("\n");
     }
 
