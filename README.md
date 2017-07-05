@@ -12,7 +12,7 @@
     * [Example project setup](#example-project-setup)
     * [Advanced setup](#advanced-setup)
   * [Using on Linux OS](#using-on-linux-os)
-    * TODO
+    * TODO: Should be no brainer, but add some notes
   * [Using on Mac OS](#using-on-mac-os)
      * [Prerequisites](#prerequisites)
         * [Perl6 2017.01 or newer](#perl6-201701-or-newer)
@@ -23,13 +23,17 @@
      * [Attaching to inside containers](#attaching-to-inside-containers)
      * [DNS Configuration](#dns-configuration)
   * [Using on Windows OS](#using-on-windows-os)
-     * [Prerequisites](#prerequisites)
+     * [Prerequisites](#prerequisites-1)
+     * [Install platform tool](#install-platform-tool-1)
+     * [Platform services](#platform-services-1)
+     * [Running environments](#running-environments-1)
+     * [Attaching to inside containers](#Attaching-to-inside-containers-1)
+     * [DNS configuration](#dns-configuration-1)
   * [Contributing](#contributing)
      * [Tools](#tools)
   * [General todo and known issues](#todo-and-known-issues)
   * [Misc notes](#misc-notes)
   * [References](#references)
-
 
 ## Overview
 
@@ -317,9 +321,11 @@ Set up your network connection to use 127.0.0.1 address as DNS server. Test DNS 
 
 ## General todo and known issues
 
+* General: Add `git clone ..` function on environment files for easy start
 * General: No feedback on e.g. build phase when it can take a long time on fetching things
 * macOS: There is no bridge between host and containers. This can help https://github.com/mal/docker-for-mac-host-bridge
 * macOS: If not bridging the networks you'll need local DNS server to point default ```*.localhost``` address to 127.0.0.1 (```brew install dnsmasq``` and so on)
+* Windows: Ability to make port forwardings and settings through platform
 
 ## Remarks
 
