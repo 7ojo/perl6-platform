@@ -13,6 +13,10 @@ role Platform::Docker::DNS is Platform::Container {
                 require Platform::Docker::DNS::MacOS;
                 $service = Platform::Docker::DNS::MacOS.new(:$.network, :$.domain, :$.data-path);
             }
+            when 'windows' {
+                require Platform::Docker::DNS::Windows;
+                $service = Platform::Docker::DNS::Windows.new(:$.network, :$.domain, :$.data-path);
+            }
             default {
                 require Platform::Docker::DNS::Linux;
                 $service = Platform::Docker::DNS::Linux.new(:$.network, :$.domain, :$.data-path);
@@ -26,6 +30,10 @@ role Platform::Docker::DNS is Platform::Container {
             when 'macos' {
                 require Platform::Docker::DNS::MacOS;
                 return Platform::Docker::DNS::MacOS.new(:$.network, :$.domain, :$.data-path).stop;
+            }
+            when 'windows' {
+                require Platform::Docker::DNS::Windows;
+                return Platform::Docker::DNS::Windows.new(:$.network, :$.domain, :$.data-path).stop;
             }
             default {
                 my $proc = run <docker stop -t 0>, 'platform-' ~ self.name.lc, :out, :err;

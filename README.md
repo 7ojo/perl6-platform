@@ -280,9 +280,10 @@ This can take a while, because of fetching container files from docker hub.
     $ platform create
     ...
     $ docker ps
-    CONTAINER ID        IMAGE                    COMMAND                  CREATED              STATUS              PORTS                         NAMES
-    9af9923ebb11        jwilder/nginx-proxy      "/app/docker-entry..."   26 seconds ago       Up 24 seconds       0.0.0.0:80->80/tcp, 443/tcp   platform-proxy
-    6059d2c36f59        zetaron/docker-dns-gen   "entrypoint generate"    About a minute ago   Up About a minute   0.0.0.0:53->53/udp            platform-dns
+    CONTAINER ID        IMAGE                    COMMAND                  CREATED             STATUS              PORTS                NAMES
+    fabe43bf44bf        jwilder/nginx-proxy      "/app/docker-entry..."   5 minutes ago       Up 5 minutes        0.0.0.0:80->80/tcp   platform-proxy
+    6a8d7a645967        zetaron/docker-dns-gen   "entrypoint generate"    5 minutes ago       Up 5 minutes        0.0.0.0:53->53/udp   platform-dns-out
+    35241df24a3f        zetaron/docker-dns-gen   "entrypoint generate"    5 minutes ago       Up 5 minutes        53/udp               platform-dns-in
 
 ### Running environments
 
@@ -293,6 +294,8 @@ TODO: Make environment example under examples/
 TODO: Example usages how to attach and how check that dns resolves correctly
     
 ### DNS configuration
+
+NOTE: You may have to disable IPV6
 
 Addresses won't work out of the box so we have to circumvent little bit. Set up port forwarding on VirtualBox side from localhost to virtual machine.
 
