@@ -50,8 +50,8 @@ class Platform::Container {
             );
         if %.last-result<err>.chars > 0 {
             my $sep = $.help-hint.chars > 0 ?? '├' !! '└';
-            @lines.push: "  $sep─ " ~ join("\n│     ", wrap-text(%.last-result<err>).lines) ;
-            @lines.push: "  └─ hint: " ~ join("\n     ", wrap-text($.help-hint).lines) ;
+            @lines.push: "  $sep─ " ~ join("\n│     ", wrap-text(%.last-result<err>).lines) if %.last-result<err>;
+            @lines.push: "  └─ hint: " ~ join("\n     ", wrap-text($.help-hint).lines) if $.help-hint;
         }
         @lines.join("\n");
     }
