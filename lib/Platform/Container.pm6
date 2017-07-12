@@ -1,5 +1,6 @@
 use v6;
 use Text::Wrap;
+use Platform::Util::OS;
 
 class Platform::Container {
 
@@ -44,12 +45,14 @@ class Platform::Container {
 
     method as-string {
         my @lines;
+        my Str %strings = ( 'OK' => "\c[CHECK MARK]", 'FAIL' => "\c[HEAVY MULTIPLICATION X]" );
+        %strings<OK FAIL> Z= <OK FAIL> if Platform::Util::OS.detect() eq 'windows';
         @lines.push: sprintf("+ %-12s     [%s]",
             $.name,
-            %.last-result<err>.chars == 0 ?? "\c[CHECK MARK]" !! "\c[HEAVY MULTIPLICATION X]"
+            %.last-result<err>.chars == 0 ?? %strings<OK> !! %strings<FAIL>
             );
         if %.last-result<err>.chars > 0 {
-            my $sep = $.help-hint.chars > 0 ?? '├' !! '└';
+            my $sep = $.help-hint && $.help-hint.chars > 0 ?? '├' !! '└';
             @lines.push: "  $sep─ " ~ join("\n│     ", wrap-text(%.last-result<err>).lines) if %.last-result<err>;
             @lines.push: "  └─ hint: " ~ join("\n     ", wrap-text($.help-hint).lines) if $.help-hint;
         }
