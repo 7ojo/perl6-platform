@@ -1,4 +1,5 @@
 use v6;
+use Platform::Emoji;
 use Platform::Container;
 use YAMLish;
 use Terminal::ANSIColor;
@@ -58,14 +59,14 @@ class Platform::Project {
         @active.unshift('build');
         
         for @active {
-            put color('yellow'), "» {$_.samecase('Ab')}", color('reset');
+            put color('yellow'), Platform::Emoji.default, " : {$_.samecase('Ab')}", color('reset');
             $cont."{$_.lc}"();
         }
         my $res = $cont.last-command: $cont.run;
 
         if $config{'exec'} {
             my Bool $sleep = $cont.need-sleep-before-exec;
-            print color('yellow'), "» Exec", color('reset');
+            print color('yellow'), Platform::Emoji.default, " : Exec", color('reset');
             if $sleep {
                 print ' (waiting for services';
                 for 1..3 {

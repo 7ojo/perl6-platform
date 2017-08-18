@@ -1,5 +1,6 @@
 use v6;
 use Platform::Container;
+use Platform::Docker::Command;
 
 class Platform::Docker::Container is Platform::Container {
 
@@ -17,7 +18,7 @@ class Platform::Docker::Container is Platform::Container {
             "$!dockerfile-loc/Dockerfile".IO.slurp ~~ / ^ FROM \s .* alpine / 
             ) ?? 'alpine' !! 'debian';
         $!shell = $!variant eq 'alpine' ?? 'ash' !! 'bash';
-        @!volumes = map { '--volume ' ~ self.projectdir.IO.absolute ~ '/' ~ $_ }, self.config-data<volumes>.Array if self.config-data<volumes>;
+        @!volumes = self.config-data<volumes>.Array.map({ <--volume>, self.projectdir.IO.absolute ~ '/' ~ $_ }).flat if self.config-data<volumes>;
         self.hostname = self.name ~ '.' ~ self.domain;
     }
 
@@ -33,7 +34,7 @@ class Platform::Docker::Container is Platform::Container {
                 @args.push($value) if $value.chars > 0;
             }
         }
-        run <docker build -t>, self.name, @args, <.>, :cwd«$.dockerfile-loc»;
+        Platform::Docker::Command.new(<docker>, <build -t>, self.name, @args, <.>).run(:cwd«$.dockerfile-loc»);
     }
 
     method users {
@@ -120,7 +121,7 @@ class Platform::Docker::Container is Platform::Container {
                     $local_target ~~ s'^\/'';
                     mkdir "$path/{self.name}/" ~ $local_target.IO.dirname;
                     spurt "$path/{self.name}/{$local_target}", $content;
-                    @.volumes.push: "--volume $path/{self.name}/{$local_target}:{$target}{$flags}";
+                    @.volumes.push: <--volume>, "$path/{self.name}/{$local_target}:{$target}{$flags}";
                     next;
                 } else {
                     $owner   = $content<owner> if $content<owner>;
@@ -158,7 +159,7 @@ class Platform::Docker::Container is Platform::Container {
 
         # Type of docker image e.g systemd
         if $config<type> and $config<type> eq 'systemd' {
-            @.volumes.push('--volume /sys/fs/cgroup:/sys/fs/cgroup');
+            @.volumes.push: <--volume>, "/sys/fs/cgroup:/sys/fs/cgroup";
             @.extra-args.push('--privileged');
         }
 
@@ -166,12 +167,12 @@ class Platform::Docker::Container is Platform::Container {
         @.extra-args.push("--network {$.network.Str}") if $.network-exists;
 
         # DNS
-        @.extra-args.push("--dns {$.dns.Str}") if $.dns.Str.chars > 0;
+        @.extra-args.push: <--dns>, $.dns.Str if $.dns.Str.chars > 0;
 
         # PHASE: run
         my @args = flat self.env-cmd-opts, @.volumes, @.extra-args;
-        my $cmd = "docker run {@args.join(' ')} -dit -h {self.hostname} --name {self.name} {self.name} {$config<command>}";
-        shell $cmd, :out, :err;
+        
+        Platform::Docker::Command.new(<docker>, <run>, @args.flat, <-dit>, <-h>, self.hostname, <--name>, self.name, self.name, $!shell, <-c>, $config<command>).run;
     }
     
     method start {
@@ -203,7 +204,7 @@ class Platform::Docker::Container is Platform::Container {
 
     method env-cmd-opts {
         my $config = self.config-data;
-        my @env = [ "--env VIRTUAL_HOST={self.hostname}" ];
+        my @env = <--env>, "VIRTUAL_HOST={self.hostname}";
         if $config<environment> {
             my $proc = run <git -C>, self.projectdir, <rev-parse --abbrev-ref HEAD>, :out, :err;
             my $branch = $proc.out.slurp-rest.trim;

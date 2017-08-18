@@ -2,6 +2,7 @@
 
 use v6;
 use lib 'lib';
+use Platform::Emoji;
 use Terminal::ANSIColor;
 
 multi sub load-module(:$name, :$network = 'acme', :$domain = 'localhost', :$data-path) {
@@ -33,7 +34,7 @@ multi sub load-module(:$name, :$environment, :$network = 'acme', :$domain = 'loc
 
 #| Start shared platform services
 multi sub MAIN('create', Str :$network = 'acme', Str :$domain = 'localhost', Str :$data-path = '~/.platform') {
-    put color('yellow') ~ '» Service' ~ color('reset');
+    put color('yellow') ~ Platform::Emoji.default ~ ' : Service' ~ color('reset');
     put $_.as-string for load-module(:name<Platform>, :$network, :$domain, :$data-path).create.Array;
 }
 
@@ -113,6 +114,6 @@ multi sub MAIN('ssh', 'keygen', Str :$domain = 'localhost', Str :$data-path = '~
 }
 
 sub banner returns Str {
-    color('yellow') ~ '» Project' ~ color('reset') ~ "\n";
+    color('yellow') ~ Platform::Emoji.default ~ ' : Project' ~ color('reset') ~ "\n";
 }
 

@@ -1,6 +1,9 @@
 use v6;
 use Text::Wrap;
+use Platform::Emoji;
+use Platform::Command;
 use Platform::Util::OS;
+use Terminal::ANSIColor;
 
 class Platform::Container {
 
@@ -29,8 +32,8 @@ class Platform::Container {
     }
 
     method result-as-hash($proc) {
-        my $out = $proc.out.slurp-rest(:close);
-        my $err = $proc.err.slurp-rest;
+        my $out = ($proc ~~ Platform::Command) ?? $proc.out !! $proc.out.slurp-rest(:close);
+        my $err = ($proc ~~ Platform::Command) ?? $proc.err !! $proc.err.slurp-rest;
         my %result =
             ret => $err.chars == 0,
             out => $out,
@@ -45,16 +48,21 @@ class Platform::Container {
 
     method as-string {
         my @lines;
-        my Str %strings = ( 'OK' => "\c[CHECK MARK]", 'FAIL' => "\c[HEAVY MULTIPLICATION X]" );
-        %strings<OK FAIL> Z= <OK FAIL> if Platform::Util::OS.detect() eq 'windows';
-        @lines.push: sprintf("+ %-12s     [%s]",
-            $.name,
-            %.last-result<err>.chars == 0 ?? %strings<OK> !! %strings<FAIL>
-            );
+        my Bool $success = %.last-result<err>.chars == 0;
+        if $success {
+            @lines.push: color('green') ~ "  : {$.projectdir.IO.relative}"; 
+        } else {
+            @lines.push: color('red') ~ "  : {$.projectdir.IO.relative}"; 
+
+        }
         if %.last-result<err>.chars > 0 {
-            my $sep = $.help-hint && $.help-hint.chars > 0 ?? '├' !! '└';
-            @lines.push: "  $sep─ " ~ join("\n│     ", wrap-text(%.last-result<err>).lines) if %.last-result<err>;
-            @lines.push: "  └─ hint: " ~ join("\n     ", wrap-text($.help-hint).lines) if $.help-hint;
+            my $wrapped-err = wrap-text(%.last-result<err>);
+            my $sep = ($.help-hint && $.help-hint.chars > 0 
+                )
+                ?? '├' 
+                !! '└';
+            @lines.push: "  $sep─ " ~ join("\n  "~($.help-hint ?? "│" !! '')~"   ", $wrapped-err.lines) if %.last-result<err>;
+            @lines.push: "  └─ " ~ color('yellow') ~ "hint: " ~ join("\n     ", wrap-text($.help-hint).lines) if $.help-hint;
         }
         @lines.join("\n");
     }
