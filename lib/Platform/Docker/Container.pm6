@@ -103,13 +103,11 @@ class Platform::Docker::Container is Platform::Container {
             exit;
         }
         my @args = flat self.env-cmd-opts;
-        my $proc = shell "docker run {@args.join(' ')} -d -it --name {self.name} {self.name} {self.shell}", :out;
-        my $out = $proc.out.slurp-rest;
+        Platform::Docker::Command.new(<docker>, <run>, @args.flat, <-d -it --name>, self.name, self.name, self.shell).run;
         my $domain_path = self.data-path ~ '/' ~ self.domain;
         my $path = $domain_path ~ '/files';
         for $config<files>.Hash.kv -> $target, $content is rw {
             my ($owner, $group, $mode);
-            put "+ $target";
             if $content ~~ Hash {
                 if $content<volume> { # create file to host and mount it inside container
                     my Str $flags = '';
@@ -135,27 +133,25 @@ class Platform::Docker::Container is Platform::Container {
             my $file_tpl = "$path/{self.name}/" ~ $target;
             mkdir $file_tpl.IO.dirname;
             spurt $file_tpl, $content;
-            run <docker exec>, self.name, 'mkdir', '-p', $target.IO.dirname;
-            run <docker cp>, $file_tpl, self.name ~ ":$target";
-            run <docker exec>, self.name, 'chown', "$owner:$group", $target if $owner and $group;
-            run <docker exec>, self.name, 'chmod', $mode, $target if $mode;
+            Platform::Docker::Command.new(<docker>, <exec>, self.name, 'mkdir', '-p', $target.IO.dirname).run;
+            Platform::Docker::Command.new(<docker>, <cp>, $file_tpl, self.name ~ ":$target").run;
+            Platform::Docker::Command.new(<docker>, <exec>, self.name, 'chown', "$owner:$group", $target).run if $owner and $group;
+            Platform::Docker::Command.new(<docker>, <exec>, self.name, 'chmod', $mode, $target).run if $mode;
         }
-        $proc = run <docker stop -t 0>, self.name, :out; $out = $proc.out.slurp-rest;
-        $proc = run <docker commit>, self.name, self.name, :out; $out = $proc.out.slurp-rest;
-        $proc = run <docker rm>, self.name, :out; $out = $proc.out.slurp-rest;
+        Platform::Docker::Command.new(<docker>, <stop -t 0>, self.name).run;
+        Platform::Docker::Command.new(<docker>, <commit>, self.name, self.name).run;
+        Platform::Docker::Command.new(<docker>, <rm>, self.name).run;
     }
 
     method exec {
         return if not self.config-data<exec>;
-        for self.config-data<exec>.Array {
-            put "+ {$_}";
-            shell "docker exec {self.name} $_";
-        }
+        Platform::Docker::Command.new(<docker>, <exec>, self.name, $!shell, <-c>, $_).run for self.config-data<exec>.Array;
     }
 
     method run {
         my $config = self.config-data;
         $config<command> ||= '';
+        $config<command> = ($!shell, <-c>, $config<command>.flat) if $config<command>.chars > 0; 
 
         # Type of docker image e.g systemd
         if $config<type> and $config<type> eq 'systemd' {
@@ -171,8 +167,8 @@ class Platform::Docker::Container is Platform::Container {
 
         # PHASE: run
         my @args = flat self.env-cmd-opts, @.volumes, @.extra-args;
-        
-        Platform::Docker::Command.new(<docker>, <run>, @args.flat, <-dit>, <-h>, self.hostname, <--name>, self.name, self.name, $!shell, <-c>, $config<command>).run;
+       
+        Platform::Docker::Command.new(<docker>, <run>, @args.flat, <-dit>, <-h>, self.hostname, <--name>, self.name, self.name, $config<command>.flat).run;
     }
     
     method start {
@@ -208,7 +204,8 @@ class Platform::Docker::Container is Platform::Container {
         if $config<environment> {
             my $proc = run <git -C>, self.projectdir, <rev-parse --abbrev-ref HEAD>, :out, :err;
             my $branch = $proc.out.slurp-rest.trim;
-            @env = (@env, map { $_ = '--env ' ~ $_.subst(/ \$\(GIT_BRANCH\) /, $branch) }, $config<environment>.Array).flat;
+            @env = flat @env, $config<environment>.Array.map({<--env>, $_.subst(/ \$\(GIT_BRANCH\) /, $branch)}).flat;
+            # @env = (@env, map { $_ = '--env ' ~ $_.subst(/ \$\(GIT_BRANCH\) /, $branch) }, $config<environment>.Array).flat;
         }
         @env;
     }

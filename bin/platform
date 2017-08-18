@@ -2,11 +2,11 @@
 
 use v6;
 use lib 'lib';
-use Platform::Emoji;
+use Platform::Output;
 use Terminal::ANSIColor;
 
 multi sub load-module(:$name, :$network = 'acme', :$domain = 'localhost', :$data-path) {
-    require ::($name);
+    try require ::($name);
     ::($name).new(:$domain, :$data-path);
 }
 
@@ -16,8 +16,11 @@ multi sub load-module(:$name, :$project, :$network = 'acme', :$domain = 'localho
             say color('red') ~ "ERROR: " ~ $_.Str ~ color('reset');
             exit;
         }
+        default {
+            say "FOO";
+        }
     }
-    require ::($name);
+    try require ::($name);
     ::($name).new(:$project, :$network, :$domain, :$data-path);
 }
 
@@ -28,13 +31,13 @@ multi sub load-module(:$name, :$environment, :$network = 'acme', :$domain = 'loc
             exit;
         }
     }
-    require ::($name);
+    try require ::($name);
     ::($name).new(:$domain, :$data-path, :$environment);
 }
 
 #| Start shared platform services
 multi sub MAIN('create', Str :$network = 'acme', Str :$domain = 'localhost', Str :$data-path = '~/.platform') {
-    put color('yellow') ~ Platform::Emoji.default ~ ' : Service' ~ color('reset');
+    put color('yellow') ~ Platform::Output.x-prefix ~ ' Service' ~ color('reset');
     put $_.as-string for load-module(:name<Platform>, :$network, :$domain, :$data-path).create.Array;
 }
 
@@ -74,7 +77,7 @@ multi sub MAIN('remove', Str :$project, Str :$data-path = '~/.platform') {
     my $obj = load-module(:name<Platform::Project>, :$project, :$data-path);
     $obj.stop;
     my $res = $obj.rm;
-    put banner() ~ $res.as-string if $res.last-result<err>.chars > 0;
+    put banner() ~ $res.as-string if $res.last-result<err> and $res.last-result<err>.chars > 0;
 }
 
 #| Initialize and run environment
@@ -114,6 +117,6 @@ multi sub MAIN('ssh', 'keygen', Str :$domain = 'localhost', Str :$data-path = '~
 }
 
 sub banner returns Str {
-    color('yellow') ~ Platform::Emoji.default ~ ' : Project' ~ color('reset') ~ "\n";
+    color('yellow') ~ Platform::Output.x-prefix ~ 'Project' ~ color('reset') ~ "\n";
 }
 

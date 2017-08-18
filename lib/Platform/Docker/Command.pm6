@@ -3,6 +3,6 @@ use Platform::Command;
 
 class Platform::Docker::Command is Platform::Command {
 
-    my Str $.emoji = '🐳';
+    my Str $.prefix = '🐳';
 
 }

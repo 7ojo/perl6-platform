@@ -1,11 +1,11 @@
 use v6;
 use Text::Wrap;
-use Platform::Emoji;
+use Platform::Output;
 use Platform::Command;
 use Platform::Util::OS;
 use Terminal::ANSIColor;
 
-class Platform::Container {
+class Platform::Container is Platform::Output {
 
     has Str $.name is rw;
     has Str $.hostname is rw;
@@ -50,19 +50,18 @@ class Platform::Container {
         my @lines;
         my Bool $success = %.last-result<err>.chars == 0;
         if $success {
-            @lines.push: color('green') ~ "  : {$.projectdir.IO.relative}"; 
+            @lines.push: color('green') ~ " {self.after-prefix}{$.projectdir.IO.relative}"; 
         } else {
-            @lines.push: color('red') ~ "  : {$.projectdir.IO.relative}"; 
-
+            @lines.push: color('red') ~ " {self.after-prefix}{$.projectdir.IO.relative}"; 
         }
         if %.last-result<err>.chars > 0 {
             my $wrapped-err = wrap-text(%.last-result<err>);
             my $sep = ($.help-hint && $.help-hint.chars > 0 
                 )
-                ?? '├' 
-                !! '└';
-            @lines.push: "  $sep─ " ~ join("\n  "~($.help-hint ?? "│" !! '')~"   ", $wrapped-err.lines) if %.last-result<err>;
-            @lines.push: "  └─ " ~ color('yellow') ~ "hint: " ~ join("\n     ", wrap-text($.help-hint).lines) if $.help-hint;
+                ?? self.box:<├> 
+                !! self.box:<└>;
+            @lines.push: "  {$sep}{self.box:<─>} " ~ join("\n  " ~ ($.help-hint ?? self.box:<│> !! '') ~ "  ", $wrapped-err.lines) if %.last-result<err>;
+            @lines.push: "  {self.box:<└─>} " ~ color('yellow') ~ "hint: " ~ join("\n     ", wrap-text($.help-hint).lines) if $.help-hint;
         }
         @lines.join("\n");
     }

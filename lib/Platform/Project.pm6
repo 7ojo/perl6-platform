@@ -1,10 +1,10 @@
 use v6;
-use Platform::Emoji;
+use Platform::Output;
 use Platform::Container;
 use YAMLish;
 use Terminal::ANSIColor;
 
-class Platform::Project {
+class Platform::Project is Platform::Output {
 
     has Str $.config;
     has Str $.project;
@@ -59,14 +59,14 @@ class Platform::Project {
         @active.unshift('build');
         
         for @active {
-            put color('yellow'), Platform::Emoji.default, " : {$_.samecase('Ab')}", color('reset');
+            put color('yellow'), self.x-prefix, $_.samecase('Ab'), color('reset');
             $cont."{$_.lc}"();
         }
         my $res = $cont.last-command: $cont.run;
 
         if $config{'exec'} {
             my Bool $sleep = $cont.need-sleep-before-exec;
-            print color('yellow'), Platform::Emoji.default, " : Exec", color('reset');
+            print color('yellow'), self.x-prefix, "Exec", color('reset');
             if $sleep {
                 print ' (waiting for services';
                 for 1..3 {
@@ -97,7 +97,7 @@ class Platform::Project {
         %values<data-path> = self.data-path;
         %values<network> = self.network;
         %values<domain> = self.domain;
-        require ::($class);
+        try require ::($class);
         ::($class).new(|%values);
     }
 

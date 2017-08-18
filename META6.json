@@ -9,6 +9,7 @@
     "tags"          : [ "Platform", "Docker", "Tool", "Development" ],
     "provides"      : {
         "Platform"                              : "lib/Platform.pm6",
+        "Platform::Output"                      : "lib/Platform/Output.pm6",
         "Platform::Environment"                 : "lib/Platform/Environment.pm6",
         "Platform::Container"                   : "lib/Platform/Container.pm6",
         "Platform::Project"                     : "lib/Platform/Project.pm6",
