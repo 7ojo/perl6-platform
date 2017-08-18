@@ -29,7 +29,7 @@ class Platform::Command is Proc::Async {
 
     method run(:$cwd = $*CWD) {
         my Str $wrapped-cmd = wrap-text(self.path ~ ' ' ~ self.args);
-        put self.emoji ~ " : " ~ color('cyan') ~ $wrapped-cmd.lines.join("\n  : ") ~ color('reset');
+        put self.emoji ~ " : " ~ color('cyan') ~ $wrapped-cmd.lines.join(color('reset') ~ "\n  : " ~ color('cyan')) ~ color('reset');
         try sink await self.start(:$cwd);
         self;
     }
