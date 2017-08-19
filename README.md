@@ -3,6 +3,14 @@
 # Platform Project Development
 [![Build Status](https://travis-ci.org/7ojo/perl6-platform.svg?branch=master)](https://travis-ci.org/7ojo/perl6-platform)
 
+## Demo
+
+Nginx and OpenLDAP projects configured to work together through platform tool 
+
+See environment file: ```examples/02-environment/nginx-ldap.yml```
+
+![Demo-Nginx-LDAP](demo/platform-nginx-ldap.gif)
+
 ## Table of contents
 
   * [Overview](#overview)
