@@ -1,5 +1,3 @@
-![Platform logo](platform-logo.png)
-
 # Platform Project Development
 [![Build Status](https://travis-ci.org/7ojo/perl6-platform.svg?branch=master)](https://travis-ci.org/7ojo/perl6-platform)
 
