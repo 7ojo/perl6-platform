@@ -57,16 +57,17 @@ class Platform::Project is Platform::Output {
             $_;
         }, <users dirs files>;
         @active.unshift('build');
-        
+       
+        put '🏗️', self.after-prefix, color('170,85,0'), "Project: ", $.project-dir.IO.relative, color('reset'); 
         for @active {
-            put color('yellow'), self.x-prefix, $_.samecase('Ab'), color('reset');
+            put self.x-prefix, color('yellow'), $_.samecase('Ab'), color('reset');
             $cont."{$_.lc}"();
         }
         my $res = $cont.last-command: $cont.run;
 
         if $config{'exec'} {
             my Bool $sleep = $cont.need-sleep-before-exec;
-            print color('yellow'), self.x-prefix, "Exec", color('reset');
+            print self.x-prefix, color('yellow'), "Exec", color('reset');
             if $sleep {
                 print ' (waiting for services';
                 for 1..3 {

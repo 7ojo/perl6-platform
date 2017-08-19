@@ -103,7 +103,8 @@ multi sub MAIN('rm', Str :$environment, Str :$data-path = '~/.platform') {
 #| Stop and remove stopped environment
 multi sub MAIN('remove', Str :$environment, Str :$data-path = '~/.platform') {
     my $obj = load-module(:name<Platform::Environment>, :$environment, :$data-path).stop;
-    put banner() ~ load-module(:name<Platform::Environment>, :$environment, :$data-path).rm.as-string;
+    $obj.containers = [];
+    put banner() ~ $obj.rm.as-string;
 }
 
 #| Generation of RSA Private Key
@@ -117,6 +118,6 @@ multi sub MAIN('ssh', 'keygen', Str :$domain = 'localhost', Str :$data-path = '~
 }
 
 sub banner returns Str {
-    color('yellow') ~ Platform::Output.x-prefix ~ 'Project' ~ color('reset') ~ "\n";
+    '🚩' ~ Platform::Output.after-prefix ~ color('yellow') ~ 'Summary' ~ color('reset') ~ "\n";
 }
 

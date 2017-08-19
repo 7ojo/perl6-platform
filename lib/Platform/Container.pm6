@@ -48,6 +48,7 @@ class Platform::Container is Platform::Output {
 
     method as-string {
         my @lines;
+        %.last-result<err> ||= '';
         my Bool $success = %.last-result<err>.chars == 0;
         if $success {
             @lines.push: color('green') ~ " {self.after-prefix}{$.projectdir.IO.relative}"; 
