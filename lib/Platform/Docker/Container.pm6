@@ -165,18 +165,13 @@ class Platform::Docker::Container is Platform::Container {
         # DNS
         @.extra-args.push: <--dns>, $.dns.Str if $.dns.Str.chars > 0;
 
-        # PHASE: run
+        # Compute arbitrary amount of args
         my @args = flat self.env-cmd-opts, @.volumes, @.extra-args;
-       
-        my $cmd;
-        if $config<command> {
-            say "WITH COMMAND";
-            $cmd = Platform::Docker::Command.new(<docker>, <run>, <--detach>, @args.flat,<-h>, self.hostname, <--name>, self.name, self.name, $config<command>.flat).run;
-        } else {
-            say "WITHOUT COMMAND";
-            $cmd = Platform::Docker::Command.new(<docker>, <run>, <--detach>, @args.flat,<-h>, self.hostname, <--name>, self.name, self.name).run;
-        }
-        $cmd;
+      
+        # PHASE: run
+        my @params = flat <docker>, <run>, <--detach>, @args, <-h>, self.hostname, <--name>, self.name, self.name;
+        @params.append: $config<command>.flat if $config<command>;
+        Platform::Docker::Command.new(|@params).run;
     }
     
     method start {
