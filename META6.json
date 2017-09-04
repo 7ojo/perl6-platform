@@ -9,6 +9,7 @@
     "tags"          : [ "Platform", "Docker", "Tool", "Development" ],
     "provides"      : {
         "Platform"                              : "lib/Platform.pm6",
+        "Platform::Command"                     : "lib/Platform/Command.pm6",
         "Platform::Output"                      : "lib/Platform/Output.pm6",
         "Platform::Environment"                 : "lib/Platform/Environment.pm6",
         "Platform::Container"                   : "lib/Platform/Container.pm6",
@@ -19,6 +20,7 @@
         "Platform::Docker::DNS::MacOS"          : "lib/Platform/Docker/DNS/MacOS.pm6",
         "Platform::Docker::DNS::Windows"        : "lib/Platform/Docker/DNS/Windows.pm6",
         "Platform::Docker::Proxy"               : "lib/Platform/Docker/Proxy.pm6",
+        "Platform::Docker::Command"             : "lib/Platform/Docker/Command.pm6",
         "Platform::Util::OS"                    : "lib/Platform/Util/OS.pm6"
     },
     "depends"       : [

@@ -17,7 +17,7 @@ multi sub load-module(:$name, :$project, :$network = 'acme', :$domain = 'localho
             exit;
         }
         default {
-            say "FOO";
+            say "TODO: WHAT IS TIS";
         }
     }
     try require ::($name);
@@ -37,7 +37,7 @@ multi sub load-module(:$name, :$environment, :$network = 'acme', :$domain = 'loc
 
 #| Start shared platform services
 multi sub MAIN('create', Str :$network = 'acme', Str :$domain = 'localhost', Str :$data-path = '~/.platform') {
-    put color('yellow') ~ Platform::Output.x-prefix ~ ' Service' ~ color('reset');
+    put Platform::Output.x-prefix ~ color('yellow') ~ 'Services' ~ color('reset');
     put $_.as-string for load-module(:name<Platform>, :$network, :$domain, :$data-path).create.Array;
 }
 

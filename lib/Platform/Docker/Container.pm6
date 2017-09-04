@@ -77,7 +77,7 @@ class Platform::Docker::Container is Platform::Container {
     method dirs {
         return if not self.config-data<dirs>;
         my @args = flat self.env-cmd-opts;
-        Platform::Docker::Command.new(<docker>, <run>, @args.flat, <-d -it --name>, self.name, self.name, self.shell).run;
+        Platform::Docker::Command.new(<docker>, <run>, @args.flat, <-d --name>, self.name, self.name, $!shell).run;
         my $config = self.config-data;
         for $config<dirs>.Hash.kv -> $target, $content {
             my ($owner, $group, $mode);
@@ -102,7 +102,7 @@ class Platform::Docker::Container is Platform::Container {
             exit;
         }
         my @args = flat self.env-cmd-opts;
-        Platform::Docker::Command.new(<docker>, <run>, @args.flat, <-d -it --name>, self.name, self.name, self.shell).run;
+        Platform::Docker::Command.new(<docker>, <run>, @args.flat, <-d --name>, self.name, self.name, $!shell).run;
         my $domain_path = self.data-path ~ '/' ~ self.domain;
         my $path = $domain_path ~ '/files';
         for $config<files>.Hash.kv -> $target, $content is rw {
@@ -151,8 +151,7 @@ class Platform::Docker::Container is Platform::Container {
 
     method run {
         my $config = self.config-data;
-        $config<command> ||= '';
-        $config<command> = ($!shell, <-c>, $config<command>.flat) if $config<command>.chars > 0; 
+        $config<command> = ($!shell, <-c>, $config<command>.flat) if $config<command> && $config<command>.chars > 0; 
 
         # Type of docker image e.g systemd
         if $config<type> and $config<type> eq 'systemd' {
@@ -169,7 +168,15 @@ class Platform::Docker::Container is Platform::Container {
         # PHASE: run
         my @args = flat self.env-cmd-opts, @.volumes, @.extra-args;
        
-        Platform::Docker::Command.new(<docker>, <run>, @args.flat, <-dit>, <-h>, self.hostname, <--name>, self.name, self.name, $config<command>.flat).run;
+        my $cmd;
+        if $config<command> {
+            say "WITH COMMAND";
+            $cmd = Platform::Docker::Command.new(<docker>, <run>, <--detach>, @args.flat,<-h>, self.hostname, <--name>, self.name, self.name, $config<command>.flat).run;
+        } else {
+            say "WITHOUT COMMAND";
+            $cmd = Platform::Docker::Command.new(<docker>, <run>, <--detach>, @args.flat,<-h>, self.hostname, <--name>, self.name, self.name).run;
+        }
+        $cmd;
     }
     
     method start {

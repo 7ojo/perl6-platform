@@ -51,9 +51,9 @@ class Platform::Container is Platform::Output {
         %.last-result<err> ||= '';
         my Bool $success = %.last-result<err>.chars == 0;
         if $success {
-            @lines.push: color('green') ~ " {self.after-prefix}{$.projectdir.IO.relative}"; 
+            @lines.push: " {self.after-prefix}" ~ color('green') ~ "{$.projectdir.IO.relative}"; 
         } else {
-            @lines.push: color('red') ~ " {self.after-prefix}{$.projectdir.IO.relative}"; 
+            @lines.push: " {self.after-prefix}" ~ color('red') ~ "{$.projectdir.IO.relative}"; 
         }
         if %.last-result<err>.chars > 0 {
             my $wrapped-err = wrap-text(%.last-result<err>);
@@ -64,6 +64,7 @@ class Platform::Container is Platform::Output {
             @lines.push: "  {$sep}{self.box:<─>} " ~ join("\n  " ~ ($.help-hint ?? self.box:<│> !! '') ~ "  ", $wrapped-err.lines) if %.last-result<err>;
             @lines.push: "  {self.box:<└─>} " ~ color('yellow') ~ "hint: " ~ join("\n     ", wrap-text($.help-hint).lines) if $.help-hint;
         }
+        @lines[@lines.elems-1] ~= color('reset');
         @lines.join("\n");
     }
 
