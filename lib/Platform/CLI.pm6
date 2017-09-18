@@ -1,9 +1,9 @@
 unit module Platform::CLI;
 
 use Platform::CLI::Attach;
-#`(
 use Platform::CLI::Create;
 use Platform::CLI::Destroy;
+#`(
 use Platform::CLI::Remove;
 use Platform::CLI::Rm;
 use Platform::CLI::Run;
@@ -20,27 +20,35 @@ multi cli is export {
 }
 
 multi set-defaults(
-    :D( :debug($debug) ),               #= Enable debug mode
-    :$data-path = '$HOME/.platform',    #= Location of resource files
+    :D( :debug($debug) ),                                   #= Enable debug mode
+    :a( :data-path($data-path) )    = '$HOME/.platform',    #= Location of resource files
+    :d( :domain( $domain ) )        = 'localhost',          #= Domain address 
+    :n( :network( $network ) )      = 'acme',               #= Network name
     ) is export {
     set-defaults(
-        fallback    => 1,
-        debug       => $debug,
         data-path   => $data-path,
+        debug       => $debug,
+        domain      => $domain,
+        fallback    => 1,
+        network     => $network,
         );
 }
 
 multi set-defaults(*@args, *%args) {
-    for <Attach> -> $module {
-        my $class-name = "Platform::CLI::$module";
-        for <data-path> -> $class-var {
+    for <data-path domain network> -> $class-var {
+        for <
+            Attach
+            Create
+            Destroy
+            > -> $module {
+            my $class-name = "Platform::CLI::$module";
             if %args{$class-var}:exists {
                 my $value = %args{$class-var};
                 $value = $value.subst(/ '$HOME' /, $*HOME);
                 ::($class-name)::("\$$class-var") = $value;
-                %args«$class-var»:delete;
             }
         }
+        %args«$class-var»:delete;
     }
     %args<fallback>:delete;
     %args<debug>:delete;

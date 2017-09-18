@@ -1,6 +1,8 @@
 unit module Platform::CLI::Attach;
 
 our $data-path;
+our $network;
+our $domain;
 
 use CommandLine::Usage;
 
