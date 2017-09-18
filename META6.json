@@ -27,7 +27,8 @@
         "Text::Wrap",
         "YAMLish",
         "JSON::Tiny",
-        "Terminal::ANSIColor"
+        "Terminal::ANSIColor",
+        "CommandLine::Usage"
     ],
     "source-url"    : "https://github.com/7ojo/perl6-platform.git"
 }
