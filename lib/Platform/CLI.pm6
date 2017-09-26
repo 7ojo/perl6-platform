@@ -6,12 +6,11 @@ use Platform::CLI::Destroy;
 use Platform::CLI::Run;
 use Platform::CLI::Remove;
 use Platform::CLI::Rm;
-#`(
-use Platform::CLI::Run;
-use Platform::CLI::SSH;
-use Platform::CLI::SSL;
 use Platform::CLI::Start;
 use Platform::CLI::Stop;
+#`(
+use Platform::CLI::SSH;
+use Platform::CLI::SSL;
 )
 
 our $data-path is export(:vars);
@@ -44,6 +43,8 @@ multi set-defaults(*@args, *%args) {
             Run
             Remove
             Rm
+            Start
+            Stop
             > -> $module {
             my $class-name = "Platform::CLI::$module";
             if %args{$class-var}:exists {
