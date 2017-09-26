@@ -8,9 +8,9 @@ use Platform::CLI::Remove;
 use Platform::CLI::Rm;
 use Platform::CLI::Start;
 use Platform::CLI::Stop;
+use Platform::CLI::SSL;
 #`(
 use Platform::CLI::SSH;
-use Platform::CLI::SSL;
 )
 
 our $data-path is export(:vars);
@@ -45,6 +45,7 @@ multi set-defaults(*@args, *%args) {
             Rm
             Start
             Stop
+            SSL
             > -> $module {
             my $class-name = "Platform::CLI::$module";
             if %args{$class-var}:exists {
