@@ -3,8 +3,9 @@ unit module Platform::CLI;
 use Platform::CLI::Attach;
 use Platform::CLI::Create;
 use Platform::CLI::Destroy;
-#`(
+use Platform::CLI::Run;
 use Platform::CLI::Remove;
+#`(
 use Platform::CLI::Rm;
 use Platform::CLI::Run;
 use Platform::CLI::SSH;
@@ -40,6 +41,8 @@ multi set-defaults(*@args, *%args) {
             Attach
             Create
             Destroy
+            Run
+            Remove
             > -> $module {
             my $class-name = "Platform::CLI::$module";
             if %args{$class-var}:exists {

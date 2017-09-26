@@ -17,7 +17,7 @@ multi cli('create') is export {
                 cli('create', :help(True));
             }
         }
-        use Platform; # TODO: can't get require to work
+        use Platform;
         put Platform::Output.x-prefix ~ color('yellow') ~ 'Services' ~ color('reset'); 
         put $_.as-string for Platform.new(:$network, :$domain, :$data-path).create.Array;
     }
