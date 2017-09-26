@@ -18,7 +18,7 @@ class Platform::Command is Proc::Async is Platform::Output {
                 if $_ ~~ / Successfully / {
                     put $prefix ~ color('green') ~ $_ ~ color('reset');
                 } else {
-                    put $prefix ~ $_ if $_.chars > 0; 
+                    put $prefix ~ $_ ~ color('reset') if $_.chars > 0; 
                 }
             }
         });
