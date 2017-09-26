@@ -1,4 +1,4 @@
-unit module Platform::CLI::Run;
+unit module Platform::CLI::Rm;
 
 our $data-path;
 our $network;
@@ -11,36 +11,38 @@ use Platform;
 use Platform::Project;
 use Platform::Environment;
 
-#| Initialize single project or environment with collection of projects
-multi cli('run',
+#| Remove stopped project or environment
+multi cli('rm',
     $path,              #= PATH
     ) is export {
     try {
         CATCH {
             default {
                 # say .^name, do given .backtrace[0] { .file, .line, .subname }
-                # say $_;
-                put color('red') ~ $_ ~ color('reset');
-                cli('run', :help(True));
+                put color('red') ~ "ERROR: $_" ~ color('reset');
+                exit;
             }
         }
-        #put '🚩' ~ Platform::Output.after-prefix ~ color('yellow') ~ 'Summary' ~ color('reset');
         if Platform.is-environment($path) {
-            put Platform::Environment.new(:environment($path), :$domain, :$network, :$data-path).run.as-string;
+            my $obj = Platform::Environment.new(:environment($path), :$network, :$domain, :$data-path);
+            put '🚩' ~ Platform::Output.after-prefix ~ color('yellow') ~ 'Summary' ~ color('reset');
+            put $obj.rm.as-string;
         } else {
-            put Platform::Project.new(:project($path), :$network, :$domain, :$data-path).run.as-string;
+            my $obj = Platform::Project.new(:project($path), :$network, :$domain, :$data-path);
+            my $res = $obj.rm;
+            put $res.as-string if $res.last-result<err> and $res.last-result<err>.chars > 0;
         }
     }
 }
 
-multi cli('run',
+multi cli('rm',
     :h( :help($help) )  #= Print usage
     ) is export {
     CommandLine::Usage.new(
         :name( $*PROGRAM-NAME.IO.basename ),
         :func( &cli ),
         :desc( &cli.candidates[0].WHY.Str ),
-        :filter<run>
+        :filter<rm>
         ).parse.say;
 }
 

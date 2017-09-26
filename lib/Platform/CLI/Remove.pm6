@@ -18,21 +18,16 @@ multi cli('remove',
     try {
         CATCH {
             default {
-                #say .^name, ': ',.Str;
-                #put color('red') ~ "ERROR: $_" ~ color('reset');
                 #.Str.say;
-                say .^name, do given .backtrace[0] { .file, .line, .subname }
+                # say .^name, do given .backtrace[0] { .file, .line, .subname }
+                put color('red') ~ "ERROR: $_" ~ color('reset');
                 exit;
-                #.throw;
-                #cli('remove', :help(True));
             }
         }
-        #put '🚩' ~ Platform::Output.after-prefix ~ color('yellow') ~ 'Summary' ~ color('reset');
         if Platform.is-environment($path) {
-            say "path: $path\nnetwork: $network\ndomain: $domain\ndata-path: $data-path";
-            #my $obj = Platform::Environment(:environment($path), :$network, :$domain, :$data-path).stop;
-            my $obj = Platform::Environment(:environment($path), :$data-path).stop;
-            $obj.containers[];
+            my $obj = Platform::Environment.new(:environment($path), :$network, :$domain, :$data-path).stop;
+            $obj.containers = []; 
+            put '🚩' ~ Platform::Output.after-prefix ~ color('yellow') ~ 'Summary' ~ color('reset');
             put $obj.rm.as-string;
         } else {
             my $obj = Platform::Project.new(:project($path), :$network, :$domain, :$data-path);

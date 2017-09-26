@@ -5,8 +5,8 @@ use Platform::CLI::Create;
 use Platform::CLI::Destroy;
 use Platform::CLI::Run;
 use Platform::CLI::Remove;
-#`(
 use Platform::CLI::Rm;
+#`(
 use Platform::CLI::Run;
 use Platform::CLI::SSH;
 use Platform::CLI::SSL;
@@ -43,6 +43,7 @@ multi set-defaults(*@args, *%args) {
             Destroy
             Run
             Remove
+            Rm
             > -> $module {
             my $class-name = "Platform::CLI::$module";
             if %args{$class-var}:exists {
