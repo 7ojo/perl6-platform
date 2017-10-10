@@ -33,7 +33,7 @@ multi cli(
     :h( :help($help) )  #= Print usage
     ) is export {
     CommandLine::Usage.new(
-        :name( $*PROGRAM-NAME.IO.basename ),
+        :name( %*ENV<PERL6_PROGRAM_NAME> ),
         :func( &cli ),
         :desc( &cli.candidates[0].WHY.Str ),
         :filter<ssh keygen>
@@ -44,7 +44,7 @@ multi cli('ssh',
     :h( :help($help) )  #= Print usage
     ) is export {
     CommandLine::Usage.new(
-        :name( $*PROGRAM-NAME.IO.basename ),
+        :name( %*ENV<PERL6_PROGRAM_NAME> ),
         :func( &cli ),
         :desc( &cli.candidates[0].WHY.Str ),
         :filter<ssh>

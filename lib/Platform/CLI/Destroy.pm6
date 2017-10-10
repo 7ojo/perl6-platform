@@ -26,7 +26,7 @@ multi cli('destroy',
     :h( :help($help) )  #= Print usage
     ) is export {
     CommandLine::Usage.new(
-        :name( $*PROGRAM-NAME.IO.basename ),
+        :name( %*ENV<PERL6_PROGRAM_NAME> ),
         :func( &cli ),
         :desc( &cli.candidates[0].WHY.Str ),
         :filter<destroy>
