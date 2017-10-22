@@ -6,6 +6,13 @@ use nqp;
 
 plan 3;
 
+constant DOCKER = ( ( run <docker --version>, :out, :err ).out.slurp ~~ / ^ Docker / ).Bool;
+
+if not DOCKER {
+     skip-rest "Skipping tests because docker is not available";
+     exit;
+}
+
 my $data-dir = '.tmp/test-platform-99-setup'.IO.absolute;
 run <rm -rf>, $data-dir if $data-dir.IO.e;
 mkdir $data-dir;
@@ -40,7 +47,7 @@ subtest 'platform create', {
     $out = $proc.out.slurp-rest;
 
     require Platform::Util::OS;
-    if 'linux' eq Platform::Util::OS.new(:kernel('darwin')).detect() {
+    if 'linux' eq Platform::Util::OS.detect() {
         $versus = "platform-dns\nplatform-proxy";
         $dns-name = "dns.localhost";
     } else {
