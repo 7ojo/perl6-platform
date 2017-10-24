@@ -4,7 +4,7 @@ use Test;
 use Template;
 use nqp;
 
-plan 4;
+plan 5;
 
 constant DOCKER = ( ( run <docker --version>, :out, :err ).out.slurp ~~ / ^ Docker / ).Bool;
 
@@ -94,15 +94,16 @@ subtest 'platform ssl genrsa', {
     }
 }
 
-#`(
-
-
 subtest 'platform ssh keygen', {
     plan 3;
     run <bin/platform>, "--data-path=$data-dir/.platform", <ssh keygen>;
     ok "$data-dir/.platform/localhost/ssh".IO.e, '<data>/localhost/ssh exists';
     ok "$data-dir/.platform/localhost/ssh/$_".IO.e, "<data>/localhost/ssh/$_ exists" for <id_rsa id_rsa.pub>;
 }
+
+#`(
+
+
 
 subtest 'platform run|stop|start|rm project-butterfly', {
     plan 4;
