@@ -31,10 +31,17 @@
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinxcontrib.plantuml']
+#extensions = ['sphinxcontrib.plantuml']
+extensions = [
+    #'sphinx.ext.autodoc',
+    'sphinx.ext.inheritance_diagram',
+    'sphinx.ext.intersphinx',
+    #'autoapi.sphinx',
+    'plantweb.directive'
+]
 #plantuml = 'plantuml'
 #plantuml = 'GRAPHVIZ_DOT="/usr/local/opt/graphviz/bin/dot" exec java -jar /usr/share/plantuml/plantuml.jar'
-plantuml = '/usr/bin/plantuml -Djava.awt.headless=true ';
+#plantuml = '/usr/bin/plantuml -Djava.awt.headless=true ';
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -191,4 +198,11 @@ epub_copyright = copyright
 # A list of files that should not be packed into the epub file.
 epub_exclude_files = ['search.html']
 
+# Plantweb configuration
+plantweb_defaults = {
+    'use_cache': True,
+    'format': 'svg',
+}
 
+# Configure Graphviz
+graphviz_output_format = 'svg'
