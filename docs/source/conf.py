@@ -32,7 +32,8 @@
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = ['sphinxcontrib.plantuml']
-plantuml = 'plantuml'
+#plantuml = 'plantuml'
+plantuml = 'GRAPHVIZ_DOT="/usr/local/opt/graphviz/bin/dot" exec java -jar /usr/share/plantuml/plantuml.jar'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -96,7 +97,7 @@ html_theme_path = ["_themes", ]
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static','images']
+html_static_path = ['_static']
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
