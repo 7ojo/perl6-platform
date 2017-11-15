@@ -32,8 +32,6 @@
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = ['sphinxcontrib.plantuml']
-#plantuml = 'plantuml'
-plantuml = 'GRAPHVIZ_DOT="/usr/local/opt/graphviz/bin/dot" exec java -jar /usr/share/plantuml/plantuml.jar'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
