@@ -19,3 +19,7 @@ help:
 %: Makefile
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
+plantuml:
+	plantuml -psvg -o ../images/uml/ ./source/uml/*.uml
+
+html: plantuml

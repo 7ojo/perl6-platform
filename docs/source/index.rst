@@ -14,9 +14,11 @@ Here you'll find Platform's documentation. Tool for quickly define and launch ex
    user -> (use PlantUML)
 
    note left of user
-      Hello Again Part Three!
+      Hello Again!
    end note
    @enduml
+
+.. image:: images/uml/example.png
 
 .. toctree::
    :maxdepth: 2
