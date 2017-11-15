@@ -8,15 +8,7 @@ Welcome to Platform's documentation!
 
 Here you'll find Platform's documentation. Tool for quickly define and launch experimental architectures in a new layout where your software will sit and serve others.
 
-.. uml::
-
-   @startuml
-   user -> (use PlantUML)
-
-   note left of user
-      Hello!
-   end note
-   @enduml
+.. image:: images/uml/example.png
 
 .. toctree::
    :maxdepth: 2
