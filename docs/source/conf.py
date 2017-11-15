@@ -33,7 +33,8 @@
 # ones.
 extensions = ['sphinxcontrib.plantuml']
 #plantuml = 'plantuml'
-plantuml = 'GRAPHVIZ_DOT="/usr/local/opt/graphviz/bin/dot" exec java -jar /usr/share/plantuml/plantuml.jar'
+#plantuml = 'GRAPHVIZ_DOT="/usr/local/opt/graphviz/bin/dot" exec java -jar /usr/share/plantuml/plantuml.jar'
+plantuml = '/usr/bin/plantuml -Djava.awt.headless=true ';
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
