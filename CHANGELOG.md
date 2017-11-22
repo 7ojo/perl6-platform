@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Adjust wrap-text width according to terminal (closes #14)
 - You can now set DNS port from the command line (refs #6)
+- Git clone support on environment subsystem (closes #8)
 
 ### Fixed
 - If DNS port is reserved try next one (refs #6)
