@@ -9,7 +9,7 @@ class Platform::Docker::DNS::Linux does Platform::Docker::DNS {
     method start {
         $.hostname = $.name.lc ~ ".{$.domain}";
         my $proc;
-        loop (my $port = 53; $port <= 59; $port++) {
+        loop (my $port = $.dns-port; $port <= ($.dns-port+10); $port++) {
             $proc = run
                 <docker run -d --rm --name>,
                 'platform-' ~ self.name.lc,
@@ -26,7 +26,6 @@ class Platform::Docker::DNS::Linux does Platform::Docker::DNS {
             self.last-result = self.result-as-hash($proc);
             if $port > 53 and self.last-result<err>.chars == 0 {
                 put " {Platform::Output.after-prefix}" ~ BOLD, "notice: connected dns to port $port", RESET;
-                put " {Platform::Output.after-prefix}" ~ ITALIC, "hint: echo 'address=/localhost/127.0.0.1' > /etc/NetworkManager/dnsmasq.d/localhost", RESET;
                 last;
             } elsif self.last-result<err> ~~ / "address already in use" / {
                 put " {Platform::Output.after-prefix}" ~ BOLD, "notice: dns port $port was already reserved", RESET;
@@ -43,6 +42,24 @@ class Platform::Docker::DNS::Linux does Platform::Docker::DNS {
                 !! $json[0]{'NetworkSettings'}{'IPAddress'};
             my Str $file-resolv-conf = $.data-path ~ "/resolv.conf";
             spurt "$file-resolv-conf", "nameserver $dns-addr";
+        }
+        
+        # If all went fine then check the name if its working
+        if $proc.exitcode == 0 {
+            my Proc $ping = run <ping -c 1 dns.localhost>, :out, :err;
+            self.last-result = self.result-as-hash($ping);
+            self.help-hint = q:heredoc/END/;
+                dns is not configured properly. try this if you have NetworkManager:
+                
+                    $ sudo bash -c "echo 'address=/localhost/127.0.0.1' > /etc/NetworkManager/dnsmasq.d/localhost"
+
+                    $ sudo service NetworkManager restart
+                
+                and try ping again to dns.localhost address like this:
+                
+                    $ ping dns.localhost
+                
+                END
         }
         self;
     }

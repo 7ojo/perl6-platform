@@ -7,13 +7,13 @@ use YAMLish;
 class Platform is Platform::Container {
 
     has Str @.services = 'DNS', 'Proxy';
-    
+
     submethod BUILD {
         self.data-path .= subst(/\~/, $*HOME);
         mkdir self.data-path if not self.data-path.IO.e;
     }
 
-    method create { @.services.map: { ::("Platform::Docker::$_").new(:$.network, :$.domain, :$.data-path).start } }
+    method create { @.services.map: { ::("Platform::Docker::$_").new(:$.network, :$.domain, :$.data-path, :$.dns-port).start } }
 
     method destroy { @.services.map: { ::("Platform::Docker::$_").new(:$.network, :$.domain, :$.data-path).stop } }
 
