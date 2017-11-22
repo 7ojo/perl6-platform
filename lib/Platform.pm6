@@ -37,9 +37,13 @@ class Platform is Platform::Container {
         if $path.IO.f {
             my $dir = $path.IO.dirname;
             my $config = load-yaml $path.IO.slurp;
-            my $first-entry = $config.keys[0];
-            if "$dir/$first-entry".IO.d { # if it's directory then yml file is probably environment definition file
+            if $config<type> eq 'environment' {
                 $is-environment = True;
+            } else { # Fallback
+                my $first-entry = $config.keys[0];
+                if "$dir/$first-entry".IO.d { # if it's directory then yml file is probably environment definition file
+                    $is-environment = True;
+                }
             }
         }
         $is-environment;
