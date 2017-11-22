@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Added
+- Adjust wrap-text width according to terminal (closes #14)
+
+### Fixed
+- If DNS port is reserved try next one (refs #6)
 
 ## [0.0.5]
 ### Added
@@ -22,7 +27,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Rakudo 2017.04 and up compliance abspath -> absolute
 - Usage of ~ on project folder
 - File creation fixes when file wanted to be empty
-- Misc output cleanups 
+- Misc output cleanups
 
 ## [0.0.4]
 ### Added
