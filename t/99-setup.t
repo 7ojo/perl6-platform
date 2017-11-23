@@ -46,8 +46,8 @@ subtest 'platform create', {
     $proc = run <bin/platform>, "--data-path=$data-dir/.platform", <create>, :out;
     $out = $proc.out.slurp-rest;
 
-    require Platform::Util::OS;
-    if 'linux' eq Platform::Util::OS.detect() {
+    require App::Platform::Util::OS;
+    if 'linux' eq App::Platform::Util::OS.detect() {
         $versus = "platform-dns\nplatform-proxy";
         $dns-name = "dns.localhost";
     } else {
