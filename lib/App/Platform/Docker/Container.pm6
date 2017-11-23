@@ -201,7 +201,6 @@ class App::Platform::Docker::Container is App::Platform::Container {
     method env-cmd-opts {
         my $config = self.config-data;
         my @env = <--env>, "VIRTUAL_HOST={self.hostname}";
-        @env.push: <--env>, "PS1=foo ";
         if $config<environment> {
             my $proc = run <git -C>, self.projectdir, <rev-parse --abbrev-ref HEAD>, :out, :err;
             my $branch = $proc.out.slurp-rest.trim;

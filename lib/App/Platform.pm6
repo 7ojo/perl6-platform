@@ -37,7 +37,7 @@ class App::Platform is App::Platform::Container {
         if $path.IO.f {
             my $dir = $path.IO.dirname;
             my $config = load-yaml $path.IO.slurp;
-            if $config<type> eq 'environment' {
+            if $config<type> and $config<type> eq 'environment' {
                 $is-environment = True;
             } else { # Fallback
                 my $first-entry = $config.keys[0];
