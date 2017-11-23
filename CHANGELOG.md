@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [0.0.6]
 ### Added
 - Adjust wrap-text width according to terminal (closes #14)
 - You can now set DNS port from the command line (refs #6)
