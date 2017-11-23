@@ -1,9 +1,9 @@
 {
     "name"          : "App::Platform",
     "license"       : "MIT",
-    "version"       : "0.0.6",
+    "version"       : "0.1.0",
     "perl"          : "6",
-    "description"   : "Tool for making development environments with docker",
+    "description"   : "Tool for constructing development environments",
     "authors"       : [ "Jarkko Haapalainen <jarkko@viidakko.fi>" ],
     "auth"          : "github:7ojo",
     "tags"          : [ "Platform", "Docker", "Tool", "Development" ],
