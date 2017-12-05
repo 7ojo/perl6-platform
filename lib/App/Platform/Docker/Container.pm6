@@ -206,7 +206,6 @@ class App::Platform::Docker::Container is App::Platform::Container {
             my $branch = $proc.out.slurp-rest.trim;
             @env = flat @env, $config<environment>.Array.map({<--env>, $_.subst(/ \$\(GIT_BRANCH\) /, $branch)}).flat;
         }
-say @env;
         @env;
     }
 }

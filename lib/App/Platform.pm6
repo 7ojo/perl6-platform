@@ -13,7 +13,13 @@ class App::Platform is App::Platform::Container {
         mkdir self.data-path if not self.data-path.IO.e;
     }
 
-    method create { @.services.map: { ::("App::Platform::Docker::$_").new(:$.network, :$.domain, :$.data-path, :$.dns-port).start } }
+    method create {
+        @.services.map: {
+            ::("App::Platform::Docker::$_")
+                .new(:$.network, :$.domain, :$.data-path, :$.dns-port)
+                .start
+            }
+    }
 
     method destroy { @.services.map: { ::("App::Platform::Docker::$_").new(:$.network, :$.domain, :$.data-path).stop } }
 
