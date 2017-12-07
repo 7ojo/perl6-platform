@@ -22,7 +22,7 @@ In future we'll probably use https://github.com/mal/docker-for-mac-host-bridge t
 Linux: DNS
 ----------
 
-Platform tries to create DNS service on port 53, but which is on most systems already used by dnsmasq. Platform in this case will try to open service on next open port and then we can configure system's dnsmasq to use platform ns server for default `.localhost` network addresses. 
+Platform tries to create DNS service on port 53, but which is on most systems already used by dnsmasq. Platform in this case will try to open service on next open port and then we can configure system's dnsmasq to use platform DNS server for default ``.localhost`` network addresses. 
 
 1. Create file ``/etc/NetworkManager/dnsmasq.d/localhost`` ::
       
@@ -32,7 +32,7 @@ Platform tries to create DNS service on port 53, but which is on most systems al
       
       $ sudo service NetworkManager restart
 
-#. Test your setup (after `platform create`) ::
+#. Test your setup (after ``platform create``) ::
       
       $ ping dns.localhost
       PING dns.localhost (172.17.0.2) 56(84) bytes of data.
