@@ -30,6 +30,7 @@ Here you'll find Platform's documentation. Tool for quickly define and launch ex
    getting_started
    advanced_configurations
    specifications
+   host_configurations
 
 
 Indices and tables

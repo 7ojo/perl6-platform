@@ -1,4 +1,4 @@
-Advanced configurations
+Advanced Configurations
 =======================
 
 Feature Set
@@ -46,3 +46,15 @@ When you have tightly coupled projects you may want configure those "single" pro
 
    http://project-butterfly.local
    http://project-snail.local
+
+Custom Domain Names
+-------------------
+
+By default platform creates domain (dns) name from folder name, but you can specify additional domain names with environment variables.
+
+`<your-project>/project.yml`::
+
+   environment:
+      - VIRTUAL_HOST=*.foo.bar.localhost,foo.bar.localhost
+
+

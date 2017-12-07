@@ -4,6 +4,29 @@ Specifications
 File: project.yml
 -----------------
 
+.. list-table:: Top level definitions for project.yml file
+   :widths: 15, 15, 120
+   :header-rows: 1
+
+   * - Key
+     - Value
+     - Description
+   * - command
+     - *string*
+     - Command which is executed for container. See Docker's CMD entry
+   * - volumes
+     - *list*
+     - Volumes to mount from host Command which is executed for container. See Docker's CMD entry
+   * - volumes
+     - *list*
+     - Volumes to mount from host to container e.g. html:/usr/share/nginx/html:ro
+   * - files
+     - *list*
+     - Files to copy from host or created with given contents on the fly
+   * - dirs
+     - *list*
+     - Directories to create on the fly when container is started
+
 
 File: environment.yml
 ---------------------
