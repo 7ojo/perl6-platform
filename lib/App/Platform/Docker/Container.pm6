@@ -1,4 +1,5 @@
 use v6;
+use YAMLish;
 use App::Platform::Container;
 use App::Platform::Docker::Command;
 
@@ -208,4 +209,20 @@ class App::Platform::Docker::Container is App::Platform::Container {
         }
         @env;
     }
+    
+    method local-post-config {
+        my $config-file = self.data-path ~ '/config.yml';
+        if $config-file.IO.e {
+            my $config = load-yaml $config-file.IO.slurp;
+            # Install user defined packages
+            if self.variant eq 'alpine' {
+                App::Platform::Docker::Command.new(<docker>, <exec>, self.name, $!shell, <-c>, "apk update").run;
+                App::Platform::Docker::Command.new(<docker>, <exec>, self.name, $!shell, <-c>, "apk add $_").run for $config<packages>.Array;
+            } else {
+                App::Platform::Docker::Command.new(<docker>, <exec>, self.name, $!shell, <-c>, "apt-get update").run;
+                App::Platform::Docker::Command.new(<docker>, <exec>, self.name, $!shell, <-c>, "apt-get -y -qq -o=Dpkg::Use-Pty=0 install $_").run for $config<packages>.Array;
+            }
+        }
+    }
+
 }
