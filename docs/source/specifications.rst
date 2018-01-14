@@ -62,6 +62,20 @@ File: $HOME/.platform/config.yml
    * - Key
      - Value
      - Description
-   * - packages
+   * - dotfiles
      - *string*
-     - List of package names to be installed after project is started.
+     - Path from where init.debian, init.alpine (init.<variant>) scripts are executed
+   * - volumes
+     - *string*
+     - Mount volume from host to container e.g. /home/user/Dotfiles:/root/Dotfiles
+
+Examples of ``init.debian``, ``init.alpine`` etc files you can find here https://github.com/7ojo/Dotfiles and here's example for ``~/.platform/config.yml`` file::
+   
+   dotfiles: /root/Dotfiles
+   volumes:
+      - /Users/tojo/Dotfiles:/root/Dotfiles
+
+Sometimes you may want to skip executing init script then add ``--skip-dotfiles`` param to ``run``::
+
+   platform run --skip-dotfiles <ymlfile>
+
