@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - New: ~/.platform/config.yml packages option for installing own devtools on every project launched
 - New: Added option to skip dotfiles
+- New: Resolve symlinks (#23)
 
 ### Fixed
 - 'platform create' and erraneous messages (refs #22)
