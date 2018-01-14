@@ -20,7 +20,13 @@ class App::Platform::Docker::Container is App::Platform::Container {
             "$!dockerfile-loc/Dockerfile".IO.slurp ~~ / ^ FROM \s .* alpine / 
             ) ?? 'alpine' !! 'debian';
         $!shell = $!variant eq 'alpine' ?? 'ash' !! 'bash';
-        @!volumes = self.config-data<volumes>.Array.map({ <--volume>, self.projectdir.IO.absolute ~ '/' ~ $_ }).flat if self.config-data<volumes>;
+        @!volumes = self.config-data<volumes>
+            .Array
+            .map({
+                my ($from, $to) = split / ":" /, $_;
+                <--volume>, $from.IO.resolve ~ ":" ~ $to
+            })
+            .flat if self.config-data<volumes>;
 
         # Local Configuration File
         my $config-file = self.data-path ~ '/config.yml';
