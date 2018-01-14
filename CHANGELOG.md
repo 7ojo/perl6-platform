@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+### Added
+- New: ~/.platform/config.yml packages option for installing own devtools on every project launched
+- New: Added option to skip dotfiles
+
+### Fixed
+- 'platform create' and erraneous messages (refs #22)
+- Removed debug message
+
 ## [0.1.0]
 ### Added
 - Custom prompts now when attaching to container through ```platform attach ..``` (refs #7)
