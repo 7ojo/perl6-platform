@@ -9,7 +9,8 @@ class App::Platform::Docker::Container is App::Platform::Container {
     has Str $.variant;
     has Str $.shell;
     has @.extra-args;
-    has @.volumes;
+    has @.volumes; 
+    has Str $.dotfiles = '/root/Dotfiles';
 
     submethod BUILD {
         $!dockerfile-loc = $_ if not $!dockerfile-loc and "$_/Dockerfile".IO.e for self.projectdir ~ "/docker", self.projectdir;
@@ -20,6 +21,15 @@ class App::Platform::Docker::Container is App::Platform::Container {
             ) ?? 'alpine' !! 'debian';
         $!shell = $!variant eq 'alpine' ?? 'ash' !! 'bash';
         @!volumes = self.config-data<volumes>.Array.map({ <--volume>, self.projectdir.IO.absolute ~ '/' ~ $_ }).flat if self.config-data<volumes>;
+
+        # Local Configuration File
+        my $config-file = self.data-path ~ '/config.yml';
+        if $config-file.IO.e {
+            my $config = load-yaml $config-file.IO.slurp;
+            @!volumes.push: <--volume>, "$_" for $config<volumes>.Array;
+            $!dotfiles = $config<dotfiles> if $config<dotfiles>;
+        }
+
         self.hostname = self.name ~ '.' ~ self.domain;
     }
 
@@ -167,6 +177,9 @@ class App::Platform::Docker::Container is App::Platform::Container {
         # DNS
         @.extra-args.push: <--dns>, $.dns.Str if $.dns.Str.chars > 0;
 
+        # Publish
+        if self.config-data<publish> { @.extra-args.push: <--publish>, $_ for self.config-data<publish>.Array }
+
         # Compute arbitrary amount of args
         my @args = flat self.env-cmd-opts, @.volumes, @.extra-args;
       
@@ -211,18 +224,8 @@ class App::Platform::Docker::Container is App::Platform::Container {
     }
     
     method local-post-config {
-        my $config-file = self.data-path ~ '/config.yml';
-        if $config-file.IO.e {
-            my $config = load-yaml $config-file.IO.slurp;
-            # Install user defined packages
-            if self.variant eq 'alpine' {
-                App::Platform::Docker::Command.new(<docker>, <exec>, self.name, $!shell, <-c>, "apk update").run;
-                App::Platform::Docker::Command.new(<docker>, <exec>, self.name, $!shell, <-c>, "apk add $_").run for $config<packages>.Array;
-            } else {
-                App::Platform::Docker::Command.new(<docker>, <exec>, self.name, $!shell, <-c>, "apt-get update").run;
-                App::Platform::Docker::Command.new(<docker>, <exec>, self.name, $!shell, <-c>, "apt-get -y -qq -o=Dpkg::Use-Pty=0 install $_").run for $config<packages>.Array;
-            }
-        }
+        # Tries to find init.* scripts under dotfiles dir
+        App::Platform::Docker::Command.new(<docker>, <exec>, self.name, $!shell, <-c>, "[ -x {self.dotfiles}/init.{self.variant} ] && {self.dotfiles}/init.{self.variant}").run unless self.skip-dotfiles;
     }
 
 }

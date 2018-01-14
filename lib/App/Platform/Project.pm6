@@ -13,6 +13,7 @@ class App::Platform::Project is App::Platform::Output {
     has Str $.network = 'acme';
     has Str $.domain = 'localhost';
     has Str $.data-path is rw;
+    has Bool $.skip-dotfiles = False;
     has %.override;
 
     has %.defaults =
@@ -103,6 +104,7 @@ class App::Platform::Project is App::Platform::Output {
         %values<data-path> = self.data-path;
         %values<network> = self.network;
         %values<domain> = self.domain;
+        %values<skip-dotfiles> = self.skip-dotfiles;
         try require ::($class);
         ::($class).new(|%values);
     }

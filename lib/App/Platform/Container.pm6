@@ -18,6 +18,7 @@ class App::Platform::Container is App::Platform::Output {
     has Hash $.config-data;
     has %.last-result;
     has Str $.help-hint is rw;
+    has Bool $.skip-dotfiles = False;
 
     submethod TWEAK {
         $!data-path .= subst(/\~/, $*HOME);
