@@ -87,7 +87,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Proxy + DNS services
 - Project and Environment support
 
-[Unreleased]: https://github.com/7ojo/perl6-platform/compare/0.1.0...HEAD
+[Unreleased]: https://github.com/7ojo/perl6-platform/compare/0.2.0...HEAD
+[0.2.0]: https://github.com/7ojo/perl6-platform/compare/0.1.0...0.2.0
 [0.1.0]: https://github.com/7ojo/perl6-platform/compare/0.0.6...0.1.0
 [0.0.6]: https://github.com/7ojo/perl6-platform/compare/0.0.5...0.0.6
 [0.0.5]: https://github.com/7ojo/perl6-platform/compare/0.0.4...0.0.5
