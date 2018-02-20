@@ -30,6 +30,10 @@ class App::Platform::Docker::DNS::Linux does App::Platform::Docker::DNS {
                 last;
             } elsif $proc.err ~~ / "address already in use" / {
                 put " {App::Platform::Output.after-prefix}" ~ BOLD, "notice: dns port $port was already reserved", RESET;
+            } elsif $proc.err.chars == 0 {
+                last;
+            } else {
+                put " {App::Platform::Output.after-prefix}" ~ BOLD, "error: " ~ $proc.err, RESET;
             }
         }
         sleep 0.1;
