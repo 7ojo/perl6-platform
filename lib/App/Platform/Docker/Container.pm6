@@ -221,11 +221,21 @@ class App::Platform::Docker::Container is App::Platform::Container {
 
     method env-cmd-opts {
         my $config = self.config-data;
-        my @env = <--env>, "VIRTUAL_HOST={self.hostname}";
+        my @env;
         if $config<environment> {
             my $proc = run <git -C>, self.projectdir, <rev-parse --abbrev-ref HEAD>, :out, :err;
             my $branch = $proc.out.slurp-rest.trim;
-            @env = flat @env, $config<environment>.Array.map({<--env>, $_.subst(/ \$\(GIT_BRANCH\) /, $branch)}).flat;
+            @env = flat @env, $config<environment>.Array.map({
+                <--env>, $_
+                    .subst(/ \$\(GIT_BRANCH\) /, $branch)
+                    .subst(/ VIRTUAL_HOST\= /, "VIRTUAL_HOST=*.{self.hostname},{self.hostname},")
+            }).flat;
+        }
+        if @env.Str !~~ / VIRTUAL_HOST / {
+            @env.push: <--env>, "VIRTUAL_HOST=*.{self.hostname},{self.hostname}";
+        }
+        if @env.Str !~~ / DOMAIN / {
+            @env.push: <--env>, "DOMAIN={self.domain}";
         }
         @env;
     }
