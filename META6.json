@@ -1,7 +1,7 @@
 {
     "name"          : "App::Platform",
     "license"       : "MIT",
-    "version"       : "0.2.1",
+    "version"       : "0.3",
     "perl"          : "6",
     "description"   : "Tool for constructing development environments",
     "authors"       : [ "Jarkko Haapalainen <jarkko@viidakko.fi>" ],
@@ -41,7 +41,8 @@
         "YAMLish",
         "JSON::Tiny",
         "Terminal::ANSIColor",
-        "CommandLine::Usage"
+        "CommandLine::Usage",
+        "Template::Mustache"
     ],
     "source-url"    : "https://github.com/7ojo/perl6-platform.git"
 }
