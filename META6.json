@@ -34,7 +34,8 @@
         "App::Platform::CLI::SSH"                    : "lib/App/Platform/CLI/SSH.pm6",
         "App::Platform::CLI::SSL"                    : "lib/App/Platform/CLI/SSL.pm6",
         "App::Platform::CLI::Start"                  : "lib/App/Platform/CLI/Start.pm6",
-        "App::Platform::CLI::Stop"                   : "lib/App/Platform/CLI/Stop.pm6"
+        "App::Platform::CLI::Stop"                   : "lib/App/Platform/CLI/Stop.pm6",
+        "App::Platform::CLI::Info"                   : "lib/App/Platform/CLI/Info.pm6"
     },
     "depends"       : [
         "Text::Wrap",
