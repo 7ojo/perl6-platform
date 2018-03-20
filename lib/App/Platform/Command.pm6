@@ -8,6 +8,7 @@ class App::Platform::Command is Proc::Async is App::Platform::Output {
 
     has Str $.out is rw = '';
     has Str $.err is rw = '';
+    has Str $.last_line is rw = '';
 
     submethod TWEAK {
         my $prefix = " {self.after-prefix}";
@@ -24,7 +25,17 @@ class App::Platform::Command is Proc::Async is App::Platform::Output {
         self.stderr.tap( -> $str {
             self.err ~= $str;
             for $str.lines {
-                put $prefix ~ color('red') ~ $_ ~ color('reset') if $_.chars > 0;
+                if $_ ~~ / ^ (\.|\+)+ $ / {
+                    if self.last_line.ends-with('.') or self.last_line.ends-with('+') {
+                        print $_;
+                    } else {
+                        print $prefix ~ color('red') ~ $_;
+                    }
+                } else {
+                    put color('reset') if self.last_line.ends-with('.') or self.last_line.ends-with('+');
+                    put $prefix ~ color('red') ~ $_ ~ color('reset') if $_.chars > 0;
+                }
+                self.last_line = $_ if $_.chars > 0;
             }
         });
     }
