@@ -12,7 +12,7 @@ use App::Platform;
 #| Wrapper to openssl command
 multi cli(
     'ssl',
-    'genrsa'        #= Generation of RSA Private Key
+    :g( :genrsa($genrsa)), #= Generation of RSA Private Key
     ) is export {
     try {
         CATCH {
@@ -23,24 +23,13 @@ multi cli(
                 exit;
             }
         }
-        App::Platform.new(:$domain, :$network,:$data-path).ssl('genrsa');
+        App::Platform.new(:$domain, :$network,:$data-path).ssl('genrsa') if $genrsa;
+        cli('ssl', :help(True)) if ! $genrsa;
     }
 }
 
 multi cli(
     'ssl',
-    'genrsa',
-    :h( :help($help) )  #= Print usage
-    ) is export {
-    CommandLine::Usage.new(
-        :name( %*ENV<PERL6_PROGRAM_NAME> ),
-        :func( &cli ),
-        :desc( &cli.candidates[0].WHY.Str ),
-        :filter<ssl genrsa>
-        ).parse.say;
-}
-
-multi cli('ssl',
     :h( :help($help) )  #= Print usage
     ) is export {
     CommandLine::Usage.new(

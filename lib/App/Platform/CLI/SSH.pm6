@@ -12,7 +12,7 @@ use App::Platform;
 #| Wrapper to ssh* commandds
 multi cli(
     'ssh',
-    'keygen'        #= Generation of authentication keys
+    :k( :keygen($keygen)) #= Generation of authentication keys
     ) is export {
     try {
         CATCH {
@@ -23,21 +23,10 @@ multi cli(
                 exit;
             }
         }
-        App::Platform.new(:$domain, :$network,:$data-path).ssh('keygen');
-    }
-}
+        App::Platform.new(:$domain, :$network,:$data-path).ssh('keygen') if $keygen;
 
-multi cli(
-    'ssh',
-    'keygen',
-    :h( :help($help) )  #= Print usage
-    ) is export {
-    CommandLine::Usage.new(
-        :name( %*ENV<PERL6_PROGRAM_NAME> ),
-        :func( &cli ),
-        :desc( &cli.candidates[0].WHY.Str ),
-        :filter<ssh keygen>
-        ).parse.say;
+        cli('ssh', :help(True)) if ! $keygen;
+    }
 }
 
 multi cli('ssh',
