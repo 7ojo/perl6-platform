@@ -27,10 +27,8 @@ class App::Platform is App::Platform::Container {
     method ssl('genrsa') {
         my $ssl-dir = $.data-path ~ '/' ~ self.domain ~'/ssl';
         mkdir $ssl-dir if not $ssl-dir.IO.e;
-        my $proc = run <openssl genrsa -out>, "$ssl-dir/server-key.key", <4096>, :out, :err;
-        my $out = $proc.out.slurp-rest;
-        my $err = $proc.err.slurp-rest;
-        App::Platform::Command.new(<openssl rsa -in>, "$ssl-dir/server-key.key", <-pubout -out>, "$ssl-dir/server-key.crt").run;
+        App::Platform::Command.new(<timeout 30 openssl genrsa -out>, "$ssl-dir/server-key.key", <4096>).run;
+        App::Platform::Command.new(<timeout 30 openssl rsa -in>, "$ssl-dir/server-key.key", <-pubout -out>, "$ssl-dir/server-key.crt").run;
     }
 
     method ssh('keygen') {
