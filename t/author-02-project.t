@@ -97,9 +97,9 @@ subtest 'platform create', {
     ok $out ~~ / Proxy \s+ \[ \✓ \] /, 'service proxy is up';
 }
 
-subtest 'platform ssh keygen', {
+subtest 'platform ssh --keygen', {
     plan 3;
-    run <bin/platform>, "--data-path=$tmpdir/.platform", <ssh keygen>;
+    run <bin/platform>, "--data-path=$tmpdir/.platform", <ssh --keygen>;
     ok "$tmpdir/.platform/localhost/ssh".IO.e, '<data>/localhost/ssh exists';
     ok "$tmpdir/.platform/localhost/ssh/$_".IO.e, "<data>/localhost/ssh/$_ exists" for <id_rsa id_rsa.pub>;
 }

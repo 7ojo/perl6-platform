@@ -69,16 +69,16 @@ subtest 'platform create', {
     ok $out ~~ / Proxy \s+ \[ \✓ \] /, 'service proxy is up';
 }
 
-subtest "platform --domain=$domain-sahara ssh keygen", {
+subtest "platform --domain=$domain-sahara ssh --keygen", {
     plan 3;
-    run <bin/platform>, "--domain=$domain-sahara", "--data-path=$tmpdir/.platform", <ssh keygen>;
+    run <bin/platform>, "--domain=$domain-sahara", "--data-path=$tmpdir/.platform", <ssh --keygen>;
     ok "$tmpdir/.platform/$domain-sahara/ssh".IO.e, "<data>/$domain-sahara/ssh exists";
     ok "$tmpdir/.platform/$domain-sahara/ssh/$_".IO.e, "<data>/$domain-sahara/ssh/$_ exists" for <id_rsa id_rsa.pub>;
 }
 
-subtest "platform --domain=$domain-amazon ssh keygen", {
+subtest "platform --domain=$domain-amazon ssh --keygen", {
     plan 3;
-    run <bin/platform>, "--domain=$domain-amazon", "--data-path=$tmpdir/.platform", <ssh keygen>;
+    run <bin/platform>, "--domain=$domain-amazon", "--data-path=$tmpdir/.platform", <ssh --keygen>;
     ok "$tmpdir/.platform/$domain-amazon/ssh".IO.e, "<data>/$domain-amazon/ssh exists";
     ok "$tmpdir/.platform/$domain-amazon/ssh/$_".IO.e, "<data>/$domain-amazon/ssh/$_ exists" for <id_rsa id_rsa.pub>;
 }

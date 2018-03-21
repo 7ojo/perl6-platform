@@ -84,7 +84,7 @@ subtest 'platform create', {
 
 subtest 'platform ssl genrsa', {
     plan 4;
-    my $proc = run <bin/platform>, "--data-path=$data-dir/.platform", <ssl genrsa>, :out, :err;
+    my $proc = run <bin/platform>, "--data-path=$data-dir/.platform", <ssl --genrsa>, :out, :err;
     my $out = $proc.out.slurp-rest;
     my $err = $proc.err.slurp-rest;
 
@@ -95,9 +95,9 @@ subtest 'platform ssl genrsa', {
     }
 }
 
-subtest 'platform ssh keygen', {
+subtest 'platform ssh --keygen', {
     plan 3;
-    run <bin/platform>, "--data-path=$data-dir/.platform", <ssh keygen>;
+    run <bin/platform>, "--data-path=$data-dir/.platform", <ssh --keygen>;
     ok "$data-dir/.platform/localhost/ssh".IO.e, '<data>/localhost/ssh exists';
     ok "$data-dir/.platform/localhost/ssh/$_".IO.e, "<data>/localhost/ssh/$_ exists" for <id_rsa id_rsa.pub>;
 }
